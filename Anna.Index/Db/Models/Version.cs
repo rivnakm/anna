@@ -6,5 +6,4 @@ public class Version
 {
     public int Id { get; set; }
     public SemVersion SemanticVersion { get; set; } = null!;
-    public string FilePath { get; set; } = null!;
 }

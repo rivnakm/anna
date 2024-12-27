@@ -45,11 +45,9 @@ public class PackageIndexTest : IDisposable
         {
             new Version {
                 SemanticVersion = new SemVersion(1, 0, 0),
-                FilePath = "Package-1.0.0.nupkg"
             },
             new Version {
                 SemanticVersion = new SemVersion(2, 0, 0),
-                FilePath = "Package-2.0.0.nupkg"
             }
         }
         };

@@ -489,3 +489,6 @@ coverage_report/
 
 # Databases
 *.db
+
+# Testing directory
+.test/

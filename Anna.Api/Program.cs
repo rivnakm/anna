@@ -2,8 +2,10 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Anna.Api.Conventions;
+using Anna.Common;
 using Anna.Index;
 using Anna.Index.Db;
+using Anna.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,12 +37,13 @@ public class Program
 
         services.AddDbContext<IndexContext>(options =>
         {
-            var dbPath = Environment.GetEnvironmentVariable(EnvironmentConstants.AnnaIndexDbPath) ?? throw new InvalidOperationException($"Environment variable '{EnvironmentConstants.AnnaIndexDbPath}' is not set");
+            var dbPath = EnvironmentUtility.GetRequiredEnvironmentVariable(Index.EnvironmentConstants.AnnaIndexDbPath);
 
             options.UseSqlite($"Data Source={dbPath}");
         });
 
         services.AddScoped<IPackageIndex, PackageIndex>();
+        services.AddScoped<IPackageStorage, PackageStorage>(_ => new PackageStorage(EnvironmentUtility.GetRequiredEnvironmentVariable(Storage.EnvironmentConstants.AnnaStorageRootDir)));
 
         var app = builder.Build();
 

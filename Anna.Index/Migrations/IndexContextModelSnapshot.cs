@@ -41,10 +41,6 @@ namespace Anna.Index.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<int?>("PackageId")
                         .HasColumnType("INTEGER");
 

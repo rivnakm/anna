@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Semver" />
-    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" />
-  </ItemGroup>
-
 </Project>

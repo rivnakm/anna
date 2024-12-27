@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Storage", "Anna.Storag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Storage.Test", "Anna.Storage.Test\Anna.Storage.Test.csproj", "{EB29E20C-3B67-4398-925E-12322AB53055}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Common", "Anna.Common\Anna.Common.csproj", "{0426B0A6-B0C9-45E5-A8EE-ACAE829F4917}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Common.Test", "Anna.Common.Test\Anna.Common.Test.csproj", "{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +52,13 @@ Global
 		{EB29E20C-3B67-4398-925E-12322AB53055}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB29E20C-3B67-4398-925E-12322AB53055}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB29E20C-3B67-4398-925E-12322AB53055}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0426B0A6-B0C9-45E5-A8EE-ACAE829F4917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0426B0A6-B0C9-45E5-A8EE-ACAE829F4917}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0426B0A6-B0C9-45E5-A8EE-ACAE829F4917}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0426B0A6-B0C9-45E5-A8EE-ACAE829F4917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

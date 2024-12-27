@@ -22,4 +22,11 @@ public class PackageIndex : IPackageIndex
 
         return package.Versions.Select(v => v.SemanticVersion);
     }
+
+    public string? GetPackageName(string lowerName)
+    {
+        var package = this._dbContext.Packages.SingleOrDefault(p => p.LowerName == lowerName);
+
+        return package?.Name;
+    }
 }
