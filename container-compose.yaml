@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  anna:
+    image: anna:latest
+    build:
+      context: .
+      dockerfile: ./Containerfile
+    ports:
+      - 8080:80
+      - 8001:443
+    env_file:
+      - path: ./https.env
+        required: true
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+    volumes:
+      - ~/.aspnet/https:/https:Z,ro
+      - ./data:/data:Z
