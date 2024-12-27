@@ -1,7 +1,9 @@
-using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Anna.Api.Attributes;
+using Anna.Api.Models;
 using Anna.Index;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Anna.Api.Controllers;
@@ -19,8 +21,22 @@ public class PackageBaseAddressResourceController : ResourceController
 
     [Route("/{lowerId}/index.json")]
     [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public Task<IActionResult> GetPackageVersions(string lowerId)
     {
-        throw new NotImplementedException();
+        var versions = this._packageIndex.GetVersions(lowerId).Select(v => v.ToString()).ToList();
+
+        if (versions.Count == 0)
+        {
+            return Task.FromResult<IActionResult>(new NotFoundResult());
+        }
+
+        var response = new GetPackageVersionsResponse
+        {
+            Versions = versions
+        };
+
+        return Task.FromResult<IActionResult>(new OkObjectResult(response));
     }
 }

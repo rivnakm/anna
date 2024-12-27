@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace Anna.Index.Db;
 
+[ExcludeFromCodeCoverage]
 public class IndexContextFactory : IDesignTimeDbContextFactory<IndexContext>
 {
     public IndexContext CreateDbContext(string[] args)
