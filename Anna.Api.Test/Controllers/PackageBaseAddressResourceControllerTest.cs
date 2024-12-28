@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Anna.Api.Controllers;
 using Anna.Api.Models;
 using Anna.Index;
+using Anna.Index.Exceptions;
 using Anna.Storage;
 using FakeItEasy;
 using FluentAssertions;
@@ -47,6 +48,8 @@ public class PackageBaseAddressResourceControllerTest
     {
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
+        A.CallTo(() => packageIndex.GetVersions(A<string>._)).Throws(new PackageNotFoundException());
+
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
         var resp = await controller.GetPackageVersions("foo");
 
@@ -86,7 +89,6 @@ public class PackageBaseAddressResourceControllerTest
         const string packageLowerName = "foo";
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
-        A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Returns(Task.FromResult<string?>(null));
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
         var resp = await controller.GetPackageFile(packageLowerName, "1.0.0", $"{packageLowerName}.2.0.0");
@@ -103,7 +105,7 @@ public class PackageBaseAddressResourceControllerTest
         const string packageLowerName = "foo";
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
-        A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Returns(Task.FromResult<string?>(null));
+        A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Throws(new PackageNotFoundException());
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
         var resp = await controller.GetPackageFile(packageLowerName, "1.0.0", $"{packageLowerName}.1.0.0");
@@ -128,6 +130,87 @@ public class PackageBaseAddressResourceControllerTest
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
         var resp = await controller.GetPackageFile(packageLowerName, "3.0.0", $"{packageLowerName}.3.0.0");
+
+        resp.Should().BeOfType<NotFoundResult>();
+
+        A.CallTo(() => packageIndex.GetPackageName(A<string>._)).MustHaveHappened();
+        A.CallTo(() => packageIndex.GetVersions(A<string>._)).MustHaveHappened();
+    }
+
+    [Fact]
+    public async Task TestGetPackageManifest()
+    {
+        const string packageName = "Foo";
+        const string packageLowerName = "foo";
+        const string packageLowerVersion = "2.0.0";
+        var availableVersions = new List<NuGetVersion> {
+            new NuGetVersion(1, 0, 0),
+            new NuGetVersion(2, 0, 0)
+        };
+
+        var packageIndex = A.Fake<IPackageIndex>();
+        var packageStorage = A.Fake<IPackageStorage>();
+        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(availableVersions);
+        A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Returns(packageName);
+        A.CallTo(() => packageStorage.GetPackageManifest(packageName, A<NuGetVersion>.That.Matches(v => v.ToString().ToLowerInvariant() == packageLowerVersion))).Returns(new MemoryStream());
+
+        var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
+        var resp = await controller.GetPackageManifest(packageLowerName, packageLowerVersion, $"{packageLowerName}.{packageLowerVersion}");
+
+        resp.Should().BeOfType<FileStreamResult>();
+
+        var fileStreamResult = (FileStreamResult)resp;
+        fileStreamResult.ContentType.Should().Be(MimeTypes.Application.Xml);
+        fileStreamResult.FileDownloadName.Should().Be($"{packageLowerName}.{packageLowerVersion}.nuspec");
+    }
+
+    [Fact]
+    public async Task TestGetPackageManifest_NonMatchingIdVersionAndFilename_Returns404()
+    {
+        const string packageLowerName = "foo";
+        var packageIndex = A.Fake<IPackageIndex>();
+        var packageStorage = A.Fake<IPackageStorage>();
+
+        var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
+        var resp = await controller.GetPackageManifest(packageLowerName, "1.0.0", $"{packageLowerName}.2.0.0");
+
+        resp.Should().BeOfType<NotFoundResult>();
+
+        A.CallTo(() => packageIndex.GetPackageName(A<string>._)).MustNotHaveHappened();
+        A.CallTo(() => packageIndex.GetVersions(A<string>._)).MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task TestGetPackageManifest_NoIdMatch_Returns404()
+    {
+        const string packageLowerName = "foo";
+        var packageIndex = A.Fake<IPackageIndex>();
+        var packageStorage = A.Fake<IPackageStorage>();
+        A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Throws(new PackageNotFoundException());
+
+        var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
+        var resp = await controller.GetPackageManifest(packageLowerName, "1.0.0", $"{packageLowerName}.1.0.0");
+
+        resp.Should().BeOfType<NotFoundResult>();
+
+        A.CallTo(() => packageIndex.GetPackageName(A<string>._)).MustHaveHappened();
+        A.CallTo(() => packageIndex.GetVersions(A<string>._)).MustNotHaveHappened();
+    }
+
+    [Fact]
+    public async Task TestGetPackageManifest_NoVersionMatch_Returns404()
+    {
+        const string packageLowerName = "foo";
+        var expectedVersions = new List<NuGetVersion> {
+            new NuGetVersion(1, 0, 0),
+            new NuGetVersion(2, 0, 0)
+        };
+        var packageIndex = A.Fake<IPackageIndex>();
+        var packageStorage = A.Fake<IPackageStorage>();
+        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(expectedVersions);
+
+        var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
+        var resp = await controller.GetPackageManifest(packageLowerName, "3.0.0", $"{packageLowerName}.3.0.0");
 
         resp.Should().BeOfType<NotFoundResult>();
 

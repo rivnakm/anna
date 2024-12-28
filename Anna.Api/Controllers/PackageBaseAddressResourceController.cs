@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Anna.Api.Attributes;
 using Anna.Api.Models;
 using Anna.Index;
+using Anna.Index.Exceptions;
 using Anna.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,19 +30,21 @@ public class PackageBaseAddressResourceController : ResourceController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPackageVersions(string lowerId)
     {
-        var versions = (await this._packageIndex.GetVersions(lowerId)).Select(v => v.ToString()).ToList();
+        try
+        {
+            var versions = (await this._packageIndex.GetVersions(lowerId)).Select(v => v.ToString()).ToList();
 
-        if (versions.Count == 0)
+            var response = new GetPackageVersionsResponse
+            {
+                Versions = versions
+            };
+
+            return new OkObjectResult(response);
+        }
+        catch (PackageNotFoundException)
         {
             return new NotFoundResult();
         }
-
-        var response = new GetPackageVersionsResponse
-        {
-            Versions = versions
-        };
-
-        return new OkObjectResult(response);
     }
 
     [Route("{lowerId}/{lowerVersion}/{lowerFileName}.nupkg")]
@@ -55,24 +58,26 @@ public class PackageBaseAddressResourceController : ResourceController
             return new NotFoundResult();
         }
 
-        var name = await this._packageIndex.GetPackageName(lowerId);
-        if (name is null)
+        try
+        {
+            var name = await this._packageIndex.GetPackageName(lowerId);
+            var version = (await this._packageIndex.GetVersions(lowerId))
+                    .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
+            if (version is null)
+            {
+                return new NotFoundResult();
+            }
+
+            var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackage(name, version), MimeTypes.Application.OctetStream);
+
+            fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nupkg";
+
+            return fileStreamResult;
+        }
+        catch (PackageNotFoundException)
         {
             return new NotFoundResult();
         }
-
-        var version = (await this._packageIndex.GetVersions(lowerId))
-                .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
-        if (version is null)
-        {
-            return new NotFoundResult();
-        }
-
-        var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackage(name, version), MimeTypes.Application.OctetStream);
-
-        fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nupkg";
-
-        return fileStreamResult;
     }
 
     [Route("{lowerId}/{lowerVersion}/{lowerFileName}.nuspec")]
@@ -86,23 +91,25 @@ public class PackageBaseAddressResourceController : ResourceController
             return new NotFoundResult();
         }
 
-        var name = await this._packageIndex.GetPackageName(lowerId);
-        if (name is null)
+        try
+        {
+            var name = await this._packageIndex.GetPackageName(lowerId);
+            var version = (await this._packageIndex.GetVersions(lowerId))
+                    .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
+            if (version is null)
+            {
+                return new NotFoundResult();
+            }
+
+            var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackageManifest(name, version), MimeTypes.Application.Xml);
+
+            fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nuspec";
+
+            return fileStreamResult;
+        }
+        catch (PackageNotFoundException)
         {
             return new NotFoundResult();
         }
-
-        var version = (await this._packageIndex.GetVersions(lowerId))
-                .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
-        if (version is null)
-        {
-            return new NotFoundResult();
-        }
-
-        var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackageManifest(name, version), MimeTypes.Application.Xml);
-
-        fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nuspec";
-
-        return fileStreamResult;
     }
 }

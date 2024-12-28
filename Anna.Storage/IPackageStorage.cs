@@ -8,5 +8,5 @@ public interface IPackageStorage
     Stream GetPackageManifest(string name, NuGetVersion version);
     Task PutPackage(string name, NuGetVersion version, Stream data);
     Task PutPackageManifest(string name, NuGetVersion version, Stream data);
-    Task DeletePackage(string name, NuGetVersion version);
+    void DeletePackage(string name, NuGetVersion version);
 }

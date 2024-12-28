@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,6 +9,7 @@ using Anna.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Packaging;
+using NuGet.Versioning;
 
 namespace Anna.Api.Controllers;
 
@@ -33,7 +33,6 @@ public class PackagePublishResourceController : ResourceController
     [HttpPut]
     [Consumes(MimeTypes.Multipart.FormData)]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> PutPackage()
@@ -89,15 +88,43 @@ public class PackagePublishResourceController : ResourceController
         return new CreatedResult();
     }
 
+    [Route("{id}/{version}")]
     [HttpDelete]
     [HttpPost]
-    [Consumes(MimeTypes.Multipart.FormData)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public Task<IActionResult> UpdatePackage()
+    public async Task<IActionResult> UpdatePackage(string id, string version)
     {
         // nuget.org interprets a DELETE as an "unlist" to avoid breaking existing programs but not showing unlisted versions in search results.
         // Implementers are allowed to interpret this as a hard delete, but I will be treating it as an unlist, with a custom header to override, if desired
-        throw new NotImplementedException("DELETE/POST /v2/package is not implemented");
+
+        var nuGetVersion = NuGetVersion.Parse(version);
+        try
+        {
+            if (HttpMethods.IsDelete(this.HttpContext.Request.Method))
+            {
+                if (this.HttpContext.Request.Headers.TryGetValue("x-anna-hard-delete", out var stringVal)
+                        && bool.TryParse(stringVal, out var hardDelete)
+                        && hardDelete)
+                {
+                    await this._packageIndex.RemovePackage(id, nuGetVersion);
+                    this._packageStorage.DeletePackage(id, nuGetVersion);
+                }
+                else
+                {
+                    await this._packageIndex.UnlistPackage(id, nuGetVersion);
+                }
+            }
+            else if (HttpMethods.IsPost(this.HttpContext.Request.Method))
+            {
+                await this._packageIndex.RelistPackage(id, nuGetVersion);
+            }
+        }
+        catch (PackageNotFoundException)
+        {
+            return new NotFoundResult();
+        }
+
+        return new NoContentResult();
     }
 }

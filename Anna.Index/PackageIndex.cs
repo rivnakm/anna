@@ -20,17 +20,21 @@ public class PackageIndex : IPackageIndex
         var package = await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.LowerName == lowerName);
         if (package is null)
         {
-            return Enumerable.Empty<NuGetVersion>();
+            throw new PackageNotFoundException();
         }
 
         return package.Versions.Select(v => v.PackageVersion);
     }
 
-    public async Task<string?> GetPackageName(string lowerName)
+    public async Task<string> GetPackageName(string lowerName)
     {
         var package = await this._dbContext.Packages.SingleOrDefaultAsync(p => p.LowerName == lowerName);
+        if (package is null)
+        {
+            throw new PackageNotFoundException();
+        }
 
-        return package?.Name;
+        return package.Name;
     }
 
     public async Task AddPackage(string name, NuGetVersion version)
@@ -59,18 +63,41 @@ public class PackageIndex : IPackageIndex
         await this._dbContext.SaveChangesAsync();
     }
 
-    public Task UnlistPackage(string name, NuGetVersion version)
+    public async Task UnlistPackage(string name, NuGetVersion version)
     {
-        throw new NotImplementedException();
+        var packageVersion = (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))?.Versions
+            .SingleOrDefault(v => v.PackageVersion == version)
+            ?? throw new PackageNotFoundException();
+
+        packageVersion.Unlisted = true;
+
+        await this._dbContext.SaveChangesAsync();
     }
 
-    public Task RelistPackage(string name, NuGetVersion version)
+    public async Task RelistPackage(string name, NuGetVersion version)
     {
-        throw new NotImplementedException();
+        var packageVersion = (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))?.Versions
+            .SingleOrDefault(v => v.PackageVersion == version)
+            ?? throw new PackageNotFoundException();
+
+        packageVersion.Unlisted = false;
+
+        await this._dbContext.SaveChangesAsync();
     }
 
-    public Task RemovePackage(string name, NuGetVersion version)
+    public async Task RemovePackage(string name, NuGetVersion version)
     {
-        throw new NotImplementedException();
+        var package = await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name);
+        var packageVersion = package?.Versions
+            .SingleOrDefault(v => v.PackageVersion == version)
+            ?? throw new PackageNotFoundException();
+
+        package.Versions.Remove(packageVersion);
+        if (package.Versions.Count == 0)
+        {
+            this._dbContext.Packages.Remove(package);
+        }
+
+        await this._dbContext.SaveChangesAsync();
     }
 }

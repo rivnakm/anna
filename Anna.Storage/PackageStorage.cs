@@ -36,9 +36,21 @@ public class PackageStorage : IPackageStorage
         await this.CreateFile(Path.Combine(this.PackageDirectory(name, version), PackageManifestFileName(name, version)), data);
     }
 
-    public Task DeletePackage(string name, NuGetVersion version)
+    public void DeletePackage(string name, NuGetVersion version)
     {
-        throw new NotImplementedException();
+        var packageDir = this.PackageDirectory(name, version);
+        foreach (var file in this._filesystem.Directory.EnumerateFiles(packageDir))
+        {
+            this._filesystem.File.Delete(file);
+        }
+
+        this._filesystem.Directory.Delete(packageDir);
+
+        var parentDir = Path.GetDirectoryName(packageDir)!;
+        if (this._filesystem.Directory.GetFileSystemEntries(parentDir).Length == 0)
+        {
+            this._filesystem.Directory.Delete(parentDir);
+        }
     }
 
     private string PackageDirectory(string name, NuGetVersion version)
@@ -68,8 +80,8 @@ public class PackageStorage : IPackageStorage
 
     private async Task CreateFile(string path, Stream data)
     {
-        var parentDir = Path.GetDirectoryName(path);
-        if (parentDir is not null && !this._filesystem.Directory.Exists(parentDir))
+        var parentDir = Path.GetDirectoryName(path)!;
+        if (!this._filesystem.Directory.Exists(parentDir))
         {
             this._filesystem.Directory.CreateDirectory(parentDir);
         }
