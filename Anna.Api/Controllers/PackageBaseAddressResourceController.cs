@@ -27,13 +27,13 @@ public class PackageBaseAddressResourceController : ResourceController
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public Task<IActionResult> GetPackageVersions(string lowerId)
+    public async Task<IActionResult> GetPackageVersions(string lowerId)
     {
-        var versions = this._packageIndex.GetVersions(lowerId).Select(v => v.ToString()).ToList();
+        var versions = (await this._packageIndex.GetVersions(lowerId)).Select(v => v.ToString()).ToList();
 
         if (versions.Count == 0)
         {
-            return Task.FromResult<IActionResult>(new NotFoundResult());
+            return new NotFoundResult();
         }
 
         var response = new GetPackageVersionsResponse
@@ -41,37 +41,68 @@ public class PackageBaseAddressResourceController : ResourceController
             Versions = versions
         };
 
-        return Task.FromResult<IActionResult>(new OkObjectResult(response));
+        return new OkObjectResult(response);
     }
 
     [Route("{lowerId}/{lowerVersion}/{lowerFileName}.nupkg")]
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public Task<IActionResult> GetPackageFile(string lowerId, string lowerVersion, string lowerFileName)
+    public async Task<IActionResult> GetPackageFile(string lowerId, string lowerVersion, string lowerFileName)
     {
         if (lowerFileName != $"{lowerId}.{lowerVersion}")
         {
-            return Task.FromResult<IActionResult>(new NotFoundResult());
+            return new NotFoundResult();
         }
 
-        var name = this._packageIndex.GetPackageName(lowerId);
+        var name = await this._packageIndex.GetPackageName(lowerId);
         if (name is null)
         {
-            return Task.FromResult<IActionResult>(new NotFoundResult());
+            return new NotFoundResult();
         }
 
-        var version = this._packageIndex.GetVersions(lowerId)
+        var version = (await this._packageIndex.GetVersions(lowerId))
                 .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
         if (version is null)
         {
-            return Task.FromResult<IActionResult>(new NotFoundResult());
+            return new NotFoundResult();
         }
 
         var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackage(name, version), MimeTypes.Application.OctetStream);
 
         fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nupkg";
 
-        return Task.FromResult<IActionResult>(fileStreamResult);
+        return fileStreamResult;
+    }
+
+    [Route("{lowerId}/{lowerVersion}/{lowerFileName}.nuspec")]
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPackageManifest(string lowerId, string lowerVersion, string lowerFileName)
+    {
+        if (lowerFileName != $"{lowerId}.{lowerVersion}")
+        {
+            return new NotFoundResult();
+        }
+
+        var name = await this._packageIndex.GetPackageName(lowerId);
+        if (name is null)
+        {
+            return new NotFoundResult();
+        }
+
+        var version = (await this._packageIndex.GetVersions(lowerId))
+                .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
+        if (version is null)
+        {
+            return new NotFoundResult();
+        }
+
+        var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackageManifest(name, version), MimeTypes.Application.Xml);
+
+        fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nuspec";
+
+        return fileStreamResult;
     }
 }

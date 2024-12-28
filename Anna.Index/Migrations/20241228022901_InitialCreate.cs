@@ -30,7 +30,8 @@ namespace Anna.Index.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    SemanticVersion = table.Column<string>(type: "TEXT", nullable: false),
+                    PackageVersion = table.Column<string>(type: "TEXT", nullable: false),
+                    Unlisted = table.Column<bool>(type: "INTEGER", nullable: false),
                     PackageId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>

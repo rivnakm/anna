@@ -44,9 +44,12 @@ namespace Anna.Index.Migrations
                     b.Property<int?>("PackageId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("SemanticVersion")
+                    b.Property<string>("PackageVersion")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Unlisted")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

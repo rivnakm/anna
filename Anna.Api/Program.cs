@@ -45,6 +45,8 @@ public class Program
         services.AddScoped<IPackageIndex, PackageIndex>();
         services.AddScoped<IPackageStorage, PackageStorage>(_ => new PackageStorage(EnvironmentUtility.GetRequiredEnvironmentVariable(Storage.EnvironmentConstants.AnnaStorageRootDir)));
 
+        // TODO: add exception middleware
+
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())

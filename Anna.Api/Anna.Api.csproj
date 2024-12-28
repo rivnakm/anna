@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
-    <PackageReference Include="Semver" />
+    <PackageReference Include="NuGet.Packaging" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 

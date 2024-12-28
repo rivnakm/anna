@@ -1,6 +1,6 @@
 using Anna.Index.Db.Models;
 using Microsoft.EntityFrameworkCore;
-using Semver;
+using NuGet.Versioning;
 using Version = Anna.Index.Db.Models.Version;
 
 namespace Anna.Index.Db;
@@ -18,10 +18,10 @@ public class IndexContext : DbContext
     {
         modelBuilder
             .Entity<Version>()
-            .Property(e => e.SemanticVersion)
+            .Property(e => e.PackageVersion)
             .HasConversion(
                     v => v.ToString(),
-                    v => SemVersion.Parse(v, SemVersionStyles.Strict, 1024)
+                    v => NuGetVersion.Parse(v)
             );
     }
 }

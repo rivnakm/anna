@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Anna.Index.Migrations
 {
     [DbContext(typeof(IndexContext))]
-    [Migration("20241227212703_InitialCreate")]
+    [Migration("20241228022901_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -47,9 +47,12 @@ namespace Anna.Index.Migrations
                     b.Property<int?>("PackageId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("SemanticVersion")
+                    b.Property<string>("PackageVersion")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Unlisted")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
