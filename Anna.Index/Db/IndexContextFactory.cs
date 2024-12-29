@@ -10,10 +10,17 @@ public class IndexContextFactory : IDesignTimeDbContextFactory<IndexContext>
     public IndexContext CreateDbContext(string[] args)
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<IndexContext>();
-        var dbPath = Environment.GetEnvironmentVariable(EnvironmentConstants.AnnaIndexDbPath)
-            ?? throw new InvalidOperationException($"Environment variable '{EnvironmentConstants.AnnaIndexDbPath}' is not set");
+        var dbPath = Environment.GetEnvironmentVariable(EnvironmentConstants.AnnaIndexDbPath);
 
-        dbContextOptionsBuilder.UseSqlite($"Data Source={dbPath}");
+        if (dbPath is null)
+        {
+            // We don't need a connection to run `dotnet ef migrations ...`, but we do need to know the database provider
+            dbContextOptionsBuilder.UseSqlite();
+        }
+        else
+        {
+            dbContextOptionsBuilder.UseSqlite($"Data Source={dbPath}");
+        }
 
         return new IndexContext(dbContextOptionsBuilder.Options);
     }

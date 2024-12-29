@@ -32,7 +32,7 @@ public class PackagePublishResourceController : ResourceController
     // Also use a swashbuckle filter to add auth status codes to methods with [Authorize] (this might already happen automatically, idk)
     [HttpPut]
     [Consumes(MimeTypes.Multipart.FormData)]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> PutPackage()
@@ -40,7 +40,7 @@ public class PackagePublishResourceController : ResourceController
         // Create temp file to store package while reading metadata
         // Network streams may not be seekable so we wouldn't be able to read it multiple times
         var tempPath = Path.GetTempFileName();
-        using (var fileStream = System.IO.File.Open(tempPath, FileMode.Open))
+        await using (var fileStream = System.IO.File.Open(tempPath, FileMode.Open))
         {
             // Read package from form data
             var formContent = await this.HttpContext.Request.ReadFormAsync();
@@ -85,7 +85,7 @@ public class PackagePublishResourceController : ResourceController
         // Delete temp file
         System.IO.File.Delete(tempPath);
 
-        return new CreatedResult();
+        return new AcceptedResult();
     }
 
     [Route("{id}/{version}")]

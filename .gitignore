@@ -492,3 +492,9 @@ coverage_report/
 
 # Testing directory
 .test/
+
+# Generated files from reqnroll
+*.feature.cs
+
+# Integration test logs
+log-integration-tests-*.txt

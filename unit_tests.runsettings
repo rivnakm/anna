@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+    <RunConfiguration>
+        <TestCaseFilter>FullyQualifiedName!~IntegrationTests</TestCaseFilter>
+
+        <!-- TestCaseFilter doesn't prevent TestRun-scoped hooks from running, only the test cases
+        generated from the scenario, so we need to disable them manually -->
+        <EnvironmentVariables>
+            <RUN_INTEGRATION_TESTS>false</RUN_INTEGRATION_TESTS>
+        </EnvironmentVariables>
+    </RunConfiguration>
+</RunSettings>

@@ -35,6 +35,8 @@ public class Program
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
+        services.AddHealthChecks();
+
         services.AddDbContext<IndexContext>(options =>
         {
             var dbPath = EnvironmentUtility.GetRequiredEnvironmentVariable(Index.EnvironmentConstants.AnnaIndexDbPath);
@@ -65,6 +67,8 @@ public class Program
 
         app.UseHttpsRedirection();
         app.UseAuthorization();
+
+        app.MapHealthChecks("/healthcheck");
 
         app.MapControllers();
 

@@ -1,0 +1,16 @@
+# Git
+.git/
+
+# Build artifacts
+bin/
+obj/
+
+# Testing artifacts
+TestResults/
+coverage_report/
+
+# Generated files from reqnroll
+*.feature.cs
+
+# Integration test logs
+log-integration-tests-*.txt

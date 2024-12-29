@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Common", "Anna.Common\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Common.Test", "Anna.Common.Test\Anna.Common.Test.csproj", "{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.IntegrationTests", "Anna.IntegrationTests\Anna.IntegrationTests.csproj", "{B3F3D137-C339-45AC-9134-E5F05E768E36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,5 +62,9 @@ Global
 		{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9750FB20-B04E-4E6A-BF6B-ADB9FEDBC036}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3F3D137-C339-45AC-9134-E5F05E768E36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3F3D137-C339-45AC-9134-E5F05E768E36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3F3D137-C339-45AC-9134-E5F05E768E36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3F3D137-C339-45AC-9134-E5F05E768E36}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

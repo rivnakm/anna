@@ -3,10 +3,6 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
 WORKDIR /usr/src/anna
 COPY . .
 
-RUN mkdir -pv /data
-
-ENV ANNA_INDEX_DB_PATH="/data/index.db"
-
 RUN dotnet tool restore
 RUN dotnet restore
 
@@ -23,5 +19,9 @@ WORKDIR /app
 COPY --from=build /usr/src/anna/Anna.Api/bin/Release/net8.0/publish .
 COPY --from=build /usr/src/anna/container_entrypoint.sh .
 COPY --from=build /usr/src/anna/migrations.sql .
+
+RUN mkdir -pv /data
+ENV ANNA_INDEX_DB_PATH="/data/index.db"
+ENV ANNA_STORAGE_ROOT_DIR="/data/packages"
 
 ENTRYPOINT ["/bin/bash", "container_entrypoint.sh"]
