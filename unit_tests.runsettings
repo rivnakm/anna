@@ -9,4 +9,14 @@
             <RUN_INTEGRATION_TESTS>false</RUN_INTEGRATION_TESTS>
         </EnvironmentVariables>
     </RunConfiguration>
+    <DataCollectionRunSettings>
+        <DataCollectors>
+            <DataCollector friendlyName="XPlat code coverage">
+                <Configuration>
+                    <Format>cobertura</Format>
+                    <ExcludeByFile>**/Migrations/*.cs</ExcludeByFile>
+                </Configuration>
+            </DataCollector>
+        </DataCollectors>
+    </DataCollectionRunSettings>
 </RunSettings>

@@ -33,6 +33,7 @@ jobs:
       - name: Run tests
         run: |
           dotnet test --no-build --configuration Release --settings=all_tests.runsettings --collect:"XPlat Code Coverage" --logger "trx;LogFileName=TestResults.xml"
+          python3 ./fix_cobertura_paths.py # I believe this is a bug with coverlet
           dotnet coverage merge ./**/TestResults/**/coverage.cobertura.xml -f cobertura -o ./coverage.cobertura.xml
 
       - name: Publish test results
