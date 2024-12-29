@@ -32,11 +32,11 @@ jobs:
 
       - name: Run unit tests
         run: |
-          dotnet test --no-build --settings=unit_tests.runsettings --collect:"XPlat Code Coverage" --logger "trx;LogFileName=TestResults.xml"
+          dotnet test --no-build --configuration Release --settings=unit_tests.runsettings --collect:"XPlat Code Coverage" --logger "trx;LogFileName=TestResults.xml"
 
       - name: Run integration tests
         run: |
-          dotnet test --no-build --settings=integration_tests.runsettings --logger "trx;LogFileName=TestResults.xml"
+          dotnet test --no-build --configuration Release --settings=integration_tests.runsettings --logger "trx;LogFileName=TestResults.xml"
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
