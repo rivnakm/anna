@@ -26,7 +26,7 @@ public class PackageBaseAddressResourceController : ResourceController
 
     [Route("{lowerId}/index.json")]
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetPackageVersionsResponse))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPackageVersions(string lowerId)
     {
@@ -49,7 +49,7 @@ public class PackageBaseAddressResourceController : ResourceController
 
     [Route("{lowerId}/{lowerVersion}/{lowerFileName}.nupkg")]
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPackageFile(string lowerId, string lowerVersion, string lowerFileName)
     {
@@ -82,7 +82,7 @@ public class PackageBaseAddressResourceController : ResourceController
 
     [Route("{lowerId}/{lowerVersion}/{lowerFileName}.nuspec")]
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPackageManifest(string lowerId, string lowerVersion, string lowerFileName)
     {

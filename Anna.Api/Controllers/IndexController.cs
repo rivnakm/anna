@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Anna.Api.Attributes;
 using Anna.Api.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -20,6 +21,8 @@ public class IndexController : ControllerBase
     }
 
     [HttpGet]
+    [HttpHead]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetIndexResponse))]
     public Task<IActionResult> GetIndex()
     {
         return Task.FromResult<IActionResult>(new OkObjectResult(new GetIndexResponse
