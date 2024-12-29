@@ -1,0 +1,51 @@
+name: Build and Test Action
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: dotnet restore
+        run: |
+          dotnet tool restore
+          dotnet restore
+
+      - name: Build
+        run: |
+          dotnet build --no-restore --configuration Release
+
+      - name: Run unit tests
+        run: |
+          dotnet test --no-build --settings=unit_tests.runsettings --collect:"XPlat Code Coverage" --logger "trx;LogFileName=TestResults.xml"
+
+      - name: Run integration tests
+        run: |
+          dotnet test --no-build --settings=integration_tests.runsettings --logger "trx;LogFileName=TestResults.xml"
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            ./**/TestResults.xml
+
+      - name: Upload test coverage report
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
