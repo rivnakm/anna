@@ -33,6 +33,7 @@ jobs:
       - name: Run tests
         run: |
           dotnet test --no-build --configuration Release --settings=all_tests.runsettings --collect:"XPlat Code Coverage" --logger "trx;LogFileName=TestResults.xml"
+          dotnet coverage merge ./**/TestResults/**/coverage.cobertura.xml -f cobertura -o ./coverage.cobertura.xml
 
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
@@ -45,3 +46,7 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          format: cobertura
+          files: |
+            coverage.cobertura.xml
+
