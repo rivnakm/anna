@@ -84,15 +84,28 @@ public sealed class PackageSteps
         this._httpContext.Response.Headers = resp.Headers;
         this._httpContext.Response.Content = resp.Content;
 
-        var versions = await resp.Content.ReadFromJsonAsync<GetPackageVersionsResponse>();
-        this._packageContext.VersionList = versions?.Versions;
+        if (resp.IsSuccessStatusCode)
+        {
+            var versions = await resp.Content.ReadFromJsonAsync<GetPackageVersionsResponse>();
+            this._packageContext.VersionList = versions.Versions;
+        }
     }
 
-    [Then(@"^The list of versions should contain ([a-zA-Z0-9.]+)$")]
-    public void TheListOfVersionsShouldContain(string packageVersion)
+    [Then(@"^The list of versions should ((?:not )?contain) ([a-zA-Z0-9.]+)$")]
+    public void TheListOfVersionsShouldContain(string containOrNot, string packageVersion)
     {
-        this._packageContext.VersionList.Should().NotBeNull();
-        this._packageContext.VersionList.Should().Contain(packageVersion);
+        if (containOrNot == "contain")
+        {
+            this._packageContext.VersionList.Should().NotBeNull();
+            this._packageContext.VersionList.Should().Contain(packageVersion);
+        }
+        else
+        {
+            if (this._packageContext.VersionList is not null)
+            {
+                this._packageContext.VersionList.Should().NotContain(packageVersion);
+            }
+        }
     }
 
     [When(@"^I download the (\.nu(?:pkg|spec)) file for the package ([a-zA-Z.]+)@([a-zA-Z0-9.]+)$")]
@@ -102,6 +115,55 @@ public sealed class PackageSteps
         {
             RequestUri = new Uri($"/v3-flatcontainer/{packageName.ToLowerInvariant()}/{packageVersion.ToLowerInvariant()}/{packageName.ToLowerInvariant()}.{packageVersion.ToLowerInvariant()}{extension}", UriKind.Relative),
             Method = HttpMethod.Get,
+        };
+
+        var resp = await this._httpContext.HttpClient.SendAsync(req);
+
+        this._httpContext.Response.StatusCode = resp.StatusCode;
+        this._httpContext.Response.Headers = resp.Headers;
+        this._httpContext.Response.Content = resp.Content;
+    }
+
+    [When(@"^I unlist the package ([a-zA-Z.]+)@([a-zA-Z0-9.]+)$")]
+    public async Task IUnlistThePackage(string packageName, string packageVersion)
+    {
+        var req = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"/api/v2/package/{packageName}/{packageVersion}", UriKind.Relative),
+            Method = HttpMethod.Delete,
+        };
+
+        var resp = await this._httpContext.HttpClient.SendAsync(req);
+
+        this._httpContext.Response.StatusCode = resp.StatusCode;
+        this._httpContext.Response.Headers = resp.Headers;
+        this._httpContext.Response.Content = resp.Content;
+    }
+
+    [When(@"^I delete the package ([a-zA-Z.]+)@([a-zA-Z0-9.]+)$")]
+    public async Task IDeleteThePackage(string packageName, string packageVersion)
+    {
+        var req = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"/api/v2/package/{packageName}/{packageVersion}", UriKind.Relative),
+            Method = HttpMethod.Delete,
+        };
+        req.Headers.Add("x-anna-hard-delete", "true");
+
+        var resp = await this._httpContext.HttpClient.SendAsync(req);
+
+        this._httpContext.Response.StatusCode = resp.StatusCode;
+        this._httpContext.Response.Headers = resp.Headers;
+        this._httpContext.Response.Content = resp.Content;
+    }
+
+    [When(@"^I relist the package ([a-zA-Z.]+)@([a-zA-Z0-9.]+)$")]
+    public async Task IRelistThePackage(string packageName, string packageVersion)
+    {
+        var req = new HttpRequestMessage
+        {
+            RequestUri = new Uri($"/api/v2/package/{packageName}/{packageVersion}", UriKind.Relative),
+            Method = HttpMethod.Post,
         };
 
         var resp = await this._httpContext.HttpClient.SendAsync(req);

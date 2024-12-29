@@ -89,9 +89,8 @@ public class PackagePublishResourceController : ResourceController
     }
 
     [Route("{id}/{version}")]
-    [HttpDelete]
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdatePackage(string id, string version)
     {
@@ -101,23 +100,39 @@ public class PackagePublishResourceController : ResourceController
         var nuGetVersion = NuGetVersion.Parse(version);
         try
         {
-            if (HttpMethods.IsDelete(this.HttpContext.Request.Method))
+            await this._packageIndex.RelistPackage(id, nuGetVersion);
+        }
+        catch (PackageNotFoundException)
+        {
+            return new NotFoundResult();
+        }
+
+        return new OkResult();
+    }
+
+    [Route("{id}/{version}")]
+    [HttpDelete]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeletePackage(string id, string version)
+    {
+        // nuget.org interprets a DELETE as an "unlist" to avoid breaking existing programs but not showing unlisted versions in search results.
+        // Implementers are allowed to interpret this as a hard delete, but I will be treating it as an unlist, with a custom header to override, if desired
+
+        var nuGetVersion = NuGetVersion.Parse(version);
+        try
+        {
+            if (this.HttpContext.Request.Headers.TryGetValue("x-anna-hard-delete", out var stringVal)
+                    && bool.TryParse(stringVal, out var hardDelete)
+                    && hardDelete)
             {
-                if (this.HttpContext.Request.Headers.TryGetValue("x-anna-hard-delete", out var stringVal)
-                        && bool.TryParse(stringVal, out var hardDelete)
-                        && hardDelete)
-                {
-                    await this._packageIndex.RemovePackage(id, nuGetVersion);
-                    this._packageStorage.DeletePackage(id, nuGetVersion);
-                }
-                else
-                {
-                    await this._packageIndex.UnlistPackage(id, nuGetVersion);
-                }
+                System.Console.WriteLine("Hard deleting");
+                await this._packageIndex.RemovePackage(id, nuGetVersion);
+                this._packageStorage.DeletePackage(id, nuGetVersion);
             }
-            else if (HttpMethods.IsPost(this.HttpContext.Request.Method))
+            else
             {
-                await this._packageIndex.RelistPackage(id, nuGetVersion);
+                await this._packageIndex.UnlistPackage(id, nuGetVersion);
             }
         }
         catch (PackageNotFoundException)
