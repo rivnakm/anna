@@ -1,8 +1,13 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Anna.Index.Db;
 using Anna.Index.Exceptions;
+using Anna.Index.Models;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Versioning;
-using Version = Anna.Index.Db.Models.Version;
+using Version = Anna.Index.Models.Version;
 
 namespace Anna.Index;
 
@@ -15,34 +20,12 @@ public class PackageIndex : IPackageIndex
         this._dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<NuGetVersion>> GetVersions(string lowerName)
-    {
-        var package = await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.LowerName == lowerName);
-        if (package is null)
-        {
-            throw new PackageNotFoundException();
-        }
-
-        return package.Versions.Select(v => v.PackageVersion);
-    }
-
-    public async Task<string> GetPackageName(string lowerName)
-    {
-        var package = await this._dbContext.Packages.SingleOrDefaultAsync(p => p.LowerName == lowerName);
-        if (package is null)
-        {
-            throw new PackageNotFoundException();
-        }
-
-        return package.Name;
-    }
-
     public async Task AddPackage(string name, NuGetVersion version)
     {
         var package = await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name);
         if (package is null)
         {
-            package = (await this._dbContext.AddAsync(new Db.Models.Package
+            package = (await this._dbContext.AddAsync(new Package
             {
                 Name = name,
                 LowerName = name.ToLowerInvariant(),
@@ -93,11 +76,52 @@ public class PackageIndex : IPackageIndex
             ?? throw new PackageNotFoundException();
 
         package.Versions.Remove(packageVersion);
-        if (package.Versions.Count == 0)
+        if (package.Versions.Count() == 0)
         {
             this._dbContext.Packages.Remove(package);
         }
 
         await this._dbContext.SaveChangesAsync();
+    }
+
+    public async IAsyncEnumerable<NuGetVersion> GetVersions(string lowerName)
+    {
+        var package = await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.LowerName == lowerName);
+        if (package is null)
+        {
+            throw new PackageNotFoundException();
+        }
+
+        await foreach (var version in this._dbContext.Versions.AsAsyncEnumerable())
+        {
+            yield return version.PackageVersion;
+        }
+    }
+
+    public async Task<string> GetPackageName(string lowerName)
+    {
+        var package = await this._dbContext.Packages.SingleOrDefaultAsync(p => p.LowerName == lowerName);
+        if (package is null)
+        {
+            throw new PackageNotFoundException();
+        }
+
+        return package.Name;
+    }
+
+    public async Task<CatalogEntry> GetCatalog(string lowerName, NuGetVersion nugetVersion)
+    {
+        var package = await this._dbContext.Packages.Include(p => p.Versions)
+            .SingleOrDefaultAsync(p => p.LowerName == lowerName && p.Versions.Any(v => v.PackageVersion == nugetVersion));
+        if (package is null)
+        {
+            throw new PackageNotFoundException();
+        }
+
+        return new CatalogEntry
+        {
+            Version = nugetVersion,
+            PackageId = package.Name
+        };
     }
 }

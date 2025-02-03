@@ -1,5 +1,5 @@
 using Anna.Api.Attributes;
-using FluentAssertions;
+using Shouldly;
 
 namespace Anna.Api.Test.Attributes;
 
@@ -10,7 +10,7 @@ public class ResourceAttributeTest
     {
         var attr = new ResourceAttribute("/path/", "Name", "1.0.0");
 
-        attr.ResourceType.Should().Be("Name/1.0.0");
+        attr.ResourceType.ShouldBe("Name/1.0.0");
     }
 
     [Fact]
@@ -18,6 +18,6 @@ public class ResourceAttributeTest
     {
         var attr = new ResourceAttribute("/path/", "Name", "1.0.0");
 
-        attr.Path.Should().Be("/path/");
+        attr.Path.ShouldBe("/path/");
     }
 }

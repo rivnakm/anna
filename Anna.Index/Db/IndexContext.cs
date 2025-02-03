@@ -1,14 +1,14 @@
-using Anna.Index.Db.Models;
+using Anna.Index.Models;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Versioning;
-using Version = Anna.Index.Db.Models.Version;
+using Version = Anna.Index.Models.Version;
 
 namespace Anna.Index.Db;
 
 public class IndexContext : DbContext
 {
-    public DbSet<Package> Packages { get; set; } = null!;
-    public DbSet<Version> Versions { get; set; } = null!;
+    internal DbSet<Package> Packages { get; set; } = null!;
+    internal DbSet<Version> Versions { get; set; } = null!;
 
     public IndexContext(DbContextOptions<IndexContext> options) : base(options)
     {

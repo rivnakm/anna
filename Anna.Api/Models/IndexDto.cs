@@ -3,8 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace Anna.Api.Models;
 
-public class GetIndexResponse
+public class IndexDto
 {
+    public required string Version { get; init; }
+    public required List<Resource> Resources { get; init; }
+
     public class Resource
     {
         [JsonPropertyName("@id")]
@@ -16,7 +19,4 @@ public class GetIndexResponse
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Comment { get; init; }
     }
-
-    public required string Version { get; init; }
-    public required List<Resource> Resources { get; init; }
 }

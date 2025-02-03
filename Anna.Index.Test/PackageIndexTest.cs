@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Anna.Index.Db;
-using Anna.Index.Db.Models;
 using Anna.Index.Exceptions;
-using FluentAssertions;
+using Anna.Index.Models;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Versioning;
-using Version = Anna.Index.Db.Models.Version;
+using Shouldly;
+using Version = Anna.Index.Models.Version;
 
 namespace Anna.Index.Test;
 
@@ -32,9 +32,7 @@ public class PackageIndexTest : IDisposable
     [Fact]
     public async Task TestGetVersions_NoMatch_ReturnsEmpty()
     {
-        var get = async () => await this._packageIndex.GetVersions("package");
-
-        await get.Should().ThrowAsync<PackageNotFoundException>();
+        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.GetVersions("package").ToListAsync());
     }
 
     [Fact]
@@ -58,16 +56,14 @@ public class PackageIndexTest : IDisposable
         await this._dbContext.AddAsync(package);
         await this._dbContext.SaveChangesAsync();
 
-        var versions = await this._packageIndex.GetVersions("package");
-        versions.Should().BeEquivalentTo(package.Versions.Select(v => v.PackageVersion));
+        var versions = await this._packageIndex.GetVersions("package").ToListAsync();
+        versions.ShouldBeEquivalentTo(package.Versions.Select(v => v.PackageVersion).ToList());
     }
 
     [Fact]
     public async Task TestGetPackageName_NoMatch_Throws()
     {
-        var get = async () => await this._packageIndex.GetPackageName("package");
-
-        await get.Should().ThrowAsync<PackageNotFoundException>();
+        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.GetPackageName("package"));
     }
 
     [Fact]
@@ -92,7 +88,7 @@ public class PackageIndexTest : IDisposable
         await this._dbContext.SaveChangesAsync();
 
         var name = await this._packageIndex.GetPackageName(package.LowerName);
-        name.Should().Be(package.Name);
+        name.ShouldBe(package.Name);
     }
 
     [Fact]
@@ -103,10 +99,10 @@ public class PackageIndexTest : IDisposable
 
         await this._packageIndex.AddPackage(packageName, packageVersion);
 
-        this._dbContext.Packages.Should().ContainSingle(p => p.Name == packageName && p.LowerName == packageName.ToLowerInvariant());
+        this._dbContext.Packages.ShouldContain(p => p.Name == packageName && p.LowerName == packageName.ToLowerInvariant());
 
         var package = await this._dbContext.Packages.Include(p => p.Versions).SingleAsync(p => p.Name == packageName);
-        package.Versions.Should().ContainSingle(v => v.PackageVersion == packageVersion);
+        package.Versions.ShouldContain(v => v.PackageVersion == packageVersion);
     }
 
     [Fact]
@@ -134,10 +130,10 @@ public class PackageIndexTest : IDisposable
 
         await this._packageIndex.AddPackage(package.Name, newVersion);
 
-        this._dbContext.Packages.Should().ContainSingle(p => p.Name == package.Name && p.LowerName == package.LowerName);
+        this._dbContext.Packages.ShouldContain(p => p.Name == package.Name && p.LowerName == package.LowerName);
 
         var outPackage = await this._dbContext.Packages.Include(p => p.Versions).SingleAsync(p => p.Name == package.Name);
-        package.Versions.Should().ContainSingle(v => v.PackageVersion == newVersion);
+        package.Versions.ShouldContain(v => v.PackageVersion == newVersion);
     }
 
     [Fact]
@@ -165,7 +161,7 @@ public class PackageIndexTest : IDisposable
 
         var add = async () => await this._packageIndex.AddPackage(package.Name, newVersion);
 
-        await add.Should().ThrowAsync<PackageExistsException>();
+        await add.ShouldThrowAsync<PackageExistsException>();
     }
 
     [Fact]
@@ -192,7 +188,7 @@ public class PackageIndexTest : IDisposable
 
         var pkgVerObject = this._dbContext.Packages.Include(p => p.Versions).Single(p => p.Name == packageName).Versions.Single(v => v.PackageVersion == packageVersion);
 
-        pkgVerObject.Unlisted.Should().BeTrue();
+        pkgVerObject.Unlisted.ShouldBeTrue();
     }
 
     [Fact]
@@ -200,7 +196,7 @@ public class PackageIndexTest : IDisposable
     {
         var unlist = async () => await this._packageIndex.UnlistPackage("package", new NuGetVersion(1, 0, 0));
 
-        await unlist.Should().ThrowAsync<PackageNotFoundException>();
+        await unlist.ShouldThrowAsync<PackageNotFoundException>();
     }
 
     [Fact]
@@ -224,7 +220,7 @@ public class PackageIndexTest : IDisposable
 
         var unlist = async () => await this._packageIndex.UnlistPackage(packageName, new NuGetVersion(2, 0, 0));
 
-        await unlist.Should().ThrowAsync<PackageNotFoundException>();
+        await unlist.ShouldThrowAsync<PackageNotFoundException>();
     }
 
     [Fact]
@@ -252,7 +248,7 @@ public class PackageIndexTest : IDisposable
 
         var pkgVerObject = this._dbContext.Packages.Include(p => p.Versions).Single(p => p.Name == packageName).Versions.Single(v => v.PackageVersion == packageVersion);
 
-        pkgVerObject.Unlisted.Should().BeFalse();
+        pkgVerObject.Unlisted.ShouldBeFalse();
     }
 
     [Fact]
@@ -260,7 +256,7 @@ public class PackageIndexTest : IDisposable
     {
         var relist = async () => await this._packageIndex.RelistPackage("package", new NuGetVersion(1, 0, 0));
 
-        await relist.Should().ThrowAsync<PackageNotFoundException>();
+        await relist.ShouldThrowAsync<PackageNotFoundException>();
     }
 
     [Fact]
@@ -284,7 +280,7 @@ public class PackageIndexTest : IDisposable
 
         var relist = async () => await this._packageIndex.RelistPackage(packageName, new NuGetVersion(2, 0, 0));
 
-        await relist.Should().ThrowAsync<PackageNotFoundException>();
+        await relist.ShouldThrowAsync<PackageNotFoundException>();
     }
 
     [Fact]
@@ -309,7 +305,7 @@ public class PackageIndexTest : IDisposable
 
         await this._packageIndex.RemovePackage(packageName, packageVersion);
 
-        this._dbContext.Packages.Should().NotContain(p => p.Name == packageName);
+        this._dbContext.Packages.ShouldNotContain(p => p.Name == packageName);
     }
 
     [Fact]
@@ -338,19 +334,17 @@ public class PackageIndexTest : IDisposable
 
         await this._packageIndex.RemovePackage(packageName, packageVersion);
 
-        this._dbContext.Packages.Should().Contain(p => p.Name == packageName);
+        this._dbContext.Packages.ShouldContain(p => p.Name == packageName);
 
         var outPackage = this._dbContext.Packages.Include(p => p.Versions).Single(p => p.Name == packageName);
-        outPackage.Versions.Should().ContainSingle(v => v.PackageVersion == existingVersion);
-        outPackage.Versions.Should().NotContain(v => v.PackageVersion == packageVersion);
+        outPackage.Versions.ShouldContain(v => v.PackageVersion == existingVersion);
+        outPackage.Versions.ShouldNotContain(v => v.PackageVersion == packageVersion);
     }
 
     [Fact]
     public async Task TestRemovePackage_NoNameMatch_Throws()
     {
-        var remove = async () => await this._packageIndex.RemovePackage("package", new NuGetVersion(1, 0, 0));
-
-        await remove.Should().ThrowAsync<PackageNotFoundException>();
+        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.RemovePackage("package", new NuGetVersion(1, 0, 0)));
     }
 
     [Fact]
@@ -372,9 +366,7 @@ public class PackageIndexTest : IDisposable
         await this._dbContext.AddAsync(package);
         await this._dbContext.SaveChangesAsync();
 
-        var remove = async () => await this._packageIndex.RemovePackage(packageName, new NuGetVersion(2, 0, 0));
-
-        await remove.Should().ThrowAsync<PackageNotFoundException>();
+        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.RemovePackage(packageName, new NuGetVersion(2, 0, 0)));
     }
 
     protected virtual void Dispose(bool disposing)

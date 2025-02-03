@@ -16,7 +16,7 @@ namespace Anna.Index.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.0");
 
-            modelBuilder.Entity("Anna.Index.Db.Models.Package", b =>
+            modelBuilder.Entity("Anna.Index.Models.Package", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -35,7 +35,7 @@ namespace Anna.Index.Migrations
                     b.ToTable("Packages");
                 });
 
-            modelBuilder.Entity("Anna.Index.Db.Models.Version", b =>
+            modelBuilder.Entity("Anna.Index.Models.Version", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -58,14 +58,14 @@ namespace Anna.Index.Migrations
                     b.ToTable("Versions");
                 });
 
-            modelBuilder.Entity("Anna.Index.Db.Models.Version", b =>
+            modelBuilder.Entity("Anna.Index.Models.Version", b =>
                 {
-                    b.HasOne("Anna.Index.Db.Models.Package", null)
+                    b.HasOne("Anna.Index.Models.Package", null)
                         .WithMany("Versions")
                         .HasForeignKey("PackageId");
                 });
 
-            modelBuilder.Entity("Anna.Index.Db.Models.Package", b =>
+            modelBuilder.Entity("Anna.Index.Models.Package", b =>
                 {
                     b.Navigation("Versions");
                 });

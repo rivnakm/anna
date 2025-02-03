@@ -2,8 +2,8 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Anna.Api.Models;
 using Anna.IntegrationTests.Contexts;
-using FluentAssertions;
 using Reqnroll;
+using Shouldly;
 
 [Binding]
 public sealed class HttpSteps
@@ -22,10 +22,10 @@ public sealed class HttpSteps
     {
         if (this._indexContext.Response is null)
         {
-            this._indexContext.Response = await this._httpContext.Response.Content.ReadFromJsonAsync<GetIndexResponse>();
+            this._indexContext.Response = await this._httpContext.Response.Content.ReadFromJsonAsync<IndexDto>();
         }
 
-        this._indexContext.Response.Version.Should().Be(indexVersion);
+        this._indexContext.Response.Version.ShouldBe(indexVersion);
     }
 
     [Then(@"^The index should contain a ([a-zA-Z0-9/.]+) resource$")]
@@ -33,9 +33,9 @@ public sealed class HttpSteps
     {
         if (this._indexContext.Response is null)
         {
-            this._indexContext.Response = await this._httpContext.Response.Content.ReadFromJsonAsync<GetIndexResponse>();
+            this._indexContext.Response = await this._httpContext.Response.Content.ReadFromJsonAsync<IndexDto>();
         }
 
-        this._indexContext.Response.Resources.Should().Contain(r => r.Type == resourceType);
+        this._indexContext.Response.Resources.ShouldContain(r => r.Type == resourceType);
     }
 }

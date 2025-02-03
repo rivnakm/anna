@@ -1,7 +1,6 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using Anna.Api.Conventions;
+using Anna.Api.Resources;
 using Anna.Common;
 using Anna.Index;
 using Anna.Index.Db;
@@ -21,11 +20,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var services = builder.Services;
 
-        services.AddControllers(options =>
-            {
-                options.Conventions.Add(new ResourceAttributeMetadataConvention());
-            })
-            .AddJsonOptions(options =>
+        services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             });
@@ -43,6 +38,8 @@ public class Program
 
             options.UseSqlite($"Data Source={dbPath}");
         });
+
+        services.AddSingleton<IResourceProvider, ResourceProvider>();
 
         services.AddScoped<IPackageIndex, PackageIndex>();
         services.AddScoped<IPackageStorage, PackageStorage>(_ => new PackageStorage(EnvironmentUtility.GetRequiredEnvironmentVariable(Storage.EnvironmentConstants.AnnaStorageRootDir)));

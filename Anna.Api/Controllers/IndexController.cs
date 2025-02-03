@@ -1,11 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Anna.Api.Attributes;
 using Anna.Api.Models;
+using Anna.Api.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 namespace Anna.Api.Controllers;
 
@@ -13,33 +11,28 @@ namespace Anna.Api.Controllers;
 [ApiController]
 public class IndexController : ControllerBase
 {
-    private readonly IApiDescriptionGroupCollectionProvider _apiDescriptionGroupCollectionProvider;
+    private readonly IResourceProvider _resourceProvider;
 
-    public IndexController(IApiDescriptionGroupCollectionProvider apiDescriptionGroupCollectionProvider)
+    public IndexController(IResourceProvider resourceProvider)
     {
-        this._apiDescriptionGroupCollectionProvider = apiDescriptionGroupCollectionProvider;
+        this._resourceProvider = resourceProvider;
     }
 
     [HttpGet]
     [HttpHead]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetIndexResponse))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IndexDto))]
     public Task<IActionResult> GetIndex()
     {
-        return Task.FromResult<IActionResult>(new OkObjectResult(new GetIndexResponse
+        return Task.FromResult<IActionResult>(new OkObjectResult(new IndexDto
         {
             Version = "3.0.0",
-            Resources = this._apiDescriptionGroupCollectionProvider.ApiDescriptionGroups.Items
-                .SelectMany(group => group.Items)
-                .Where(desc => desc.RelativePath is not null)
-                .Where(desc => desc.ActionDescriptor.Properties.ContainsKey(typeof(ResourceAttribute)))
-                .DistinctBy(desc => desc.ActionDescriptor.GetProperty<ResourceAttribute>()!.ResourceType)
-                .Select(desc =>
+            Resources = this._resourceProvider.GetResources()
+                .Select(res =>
                 {
-                    var attr = desc.ActionDescriptor.GetProperty<ResourceAttribute>()!;
-                    return new GetIndexResponse.Resource
+                    return new IndexDto.Resource
                     {
-                        Id = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{attr.Path}",
-                        Type = attr.ResourceType,
+                        Id = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{res.Id}",
+                        Type = $"{res.TypeName}/{res.TypeVersion}",
                     };
                 }).ToList()
         }));

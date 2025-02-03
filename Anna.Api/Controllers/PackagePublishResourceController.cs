@@ -13,8 +13,8 @@ using NuGet.Versioning;
 
 namespace Anna.Api.Controllers;
 
-[Route("/api/v2/package")]
-[Resource("/api/v2/package", "PackagePublish", "2.0.0")]
+[Route("/packagepublish/v2")]
+[Resource("/packagepublish/v2", "PackagePublish", "2.0.0")]
 [ApiController]
 public class PackagePublishResourceController : ResourceController
 {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Anna.Api.Models;
 
-public class GetPackageVersionsResponse
+public class PackageVersionsDto
 {
     public required List<string> Versions { get; init; }
 }

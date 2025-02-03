@@ -3,8 +3,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Anna.IntegrationTests.Contexts;
-using FluentAssertions;
 using Reqnroll;
+using Shouldly;
 
 namespace Anna.IntegrationTests.Steps;
 
@@ -38,15 +38,21 @@ public sealed class HttpSteps
         this._httpContext.ResetRequest();
     }
 
-    [Then(@"^The response status code should be (\d{3})$")]
+    [Then(@"^the response status code should be (\d{3})$")]
     public void ThenTheResponseStatusCodeShouldBe(int statusCode)
     {
-        this._httpContext.Response.StatusCode.Should().Be((HttpStatusCode)statusCode);
+        this._httpContext.Response.StatusCode.ShouldBe((HttpStatusCode)statusCode);
     }
 
-    [Then(@"^The response content type should be ([a-zA-Z0-9/.\-+]+)$")]
+    [Then(@"^the response content type should be ([a-zA-Z0-9/.\-+]+)$")]
     public void ThenTheResponseContentTypeShouldBe(string contentType)
     {
-        this._httpContext.Response.Content.Headers.ContentType.MediaType.Should().BeEquivalentTo(contentType);
+        this._httpContext.Response.Content.Headers.ContentType!.MediaType.ShouldBeEquivalentTo(contentType);
+    }
+
+    [Then(@"^the response content encoding should be ([a-zA-Z0-9/.\-+]+)$")]
+    public void ThenTheResponseContentEncodingShouldBe(string contentEncoding)
+    {
+        this._httpContext.Response.Content.Headers.ContentEncoding.ShouldContain(e => string.Compare(e, contentEncoding, StringComparison.InvariantCultureIgnoreCase) == 0);
     }
 }

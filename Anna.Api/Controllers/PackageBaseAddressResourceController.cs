@@ -10,8 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Anna.Api.Controllers;
 
-[Route("/v3-flatcontainer")]
-[Resource("/v3-flatcontainer/", "PackageBaseAddress", "3.0.0")]
+[Route("/packagebaseaddress/v3")]
+[Resource("/packagebaseaddress/v3/", "PackageBaseAddress", "3.0.0")]
 [ApiController]
 public class PackageBaseAddressResourceController : ResourceController
 {
@@ -26,15 +26,15 @@ public class PackageBaseAddressResourceController : ResourceController
 
     [Route("{lowerId}/index.json")]
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(GetPackageVersionsResponse))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageVersionsDto))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPackageVersions(string lowerId)
     {
         try
         {
-            var versions = (await this._packageIndex.GetVersions(lowerId)).Select(v => v.ToString()).ToList();
+            var versions = await this._packageIndex.GetVersions(lowerId).Select(v => v.ToString()).ToListAsync();
 
-            var response = new GetPackageVersionsResponse
+            var response = new PackageVersionsDto
             {
                 Versions = versions
             };
@@ -61,8 +61,8 @@ public class PackageBaseAddressResourceController : ResourceController
         try
         {
             var name = await this._packageIndex.GetPackageName(lowerId);
-            var version = (await this._packageIndex.GetVersions(lowerId))
-                    .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
+            var version = await this._packageIndex.GetVersions(lowerId)
+                    .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
             if (version is null)
             {
                 return new NotFoundResult();
@@ -94,8 +94,8 @@ public class PackageBaseAddressResourceController : ResourceController
         try
         {
             var name = await this._packageIndex.GetPackageName(lowerId);
-            var version = (await this._packageIndex.GetVersions(lowerId))
-                    .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
+            var version = await this._packageIndex.GetVersions(lowerId)
+                    .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
             if (version is null)
             {
                 return new NotFoundResult();

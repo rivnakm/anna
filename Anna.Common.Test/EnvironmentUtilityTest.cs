@@ -1,4 +1,5 @@
-using FluentAssertions;
+using System;
+using Shouldly;
 
 namespace Anna.Common.Test;
 
@@ -13,7 +14,7 @@ public class EnvironmentUtilityTest
 
         var actual = EnvironmentUtility.GetRequiredEnvironmentVariable(key);
 
-        actual.Should().Be(value);
+        actual.ShouldBe(value);
     }
 
     [Fact]
@@ -21,8 +22,6 @@ public class EnvironmentUtilityTest
     {
         const string key = "ENV_VARIABLE_KEY";
 
-        var get = () => EnvironmentUtility.GetRequiredEnvironmentVariable(key);
-
-        get.Should().Throw<InvalidOperationException>();
+        Should.Throw<InvalidOperationException>(() => EnvironmentUtility.GetRequiredEnvironmentVariable(key));
     }
 }

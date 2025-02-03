@@ -1,10 +1,10 @@
 using System.Threading.Tasks;
 using Anna.Api.Controllers;
 using Anna.Api.Models;
+using Anna.Api.Resources;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Shouldly;
 
 namespace Anna.Api.Test.Controllers;
 
@@ -13,18 +13,18 @@ public class IndexControllerTest
     [Fact]
     public async Task TestGetIndex_NoResources()
     {
-        var apiDescriptionGroupCollectionProvider = A.Fake<IApiDescriptionGroupCollectionProvider>();
-        var controller = new IndexController(apiDescriptionGroupCollectionProvider);
+        var resourceProvider = A.Fake<IResourceProvider>();
+        var controller = new IndexController(resourceProvider);
 
         var resp = await controller.GetIndex();
 
-        resp.Should().BeOfType<OkObjectResult>();
+        resp.ShouldBeOfType<OkObjectResult>();
 
-        var index = ((OkObjectResult)resp).Value as GetIndexResponse;
+        var index = ((OkObjectResult)resp).Value as IndexDto;
 
-        index.Should().NotBeNull();
+        index.ShouldNotBeNull();
 
-        index!.Version.Should().Be("3.0.0");
-        index!.Resources.Should().BeEmpty();
+        index!.Version.ShouldBe("3.0.0");
+        index!.Resources.ShouldBeEmpty();
     }
 }

@@ -3,8 +3,8 @@ using System.IO;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
 using NuGet.Versioning;
+using Shouldly;
 
 namespace Anna.Storage.Test;
 
@@ -24,7 +24,7 @@ public class PackageStorageTest
         var package = packageStorage.GetPackage("Foo", new NuGetVersion(1, 0, 0));
 
         using var streamReader = new StreamReader(package);
-        streamReader.ReadToEnd().Should().Be(fileContents);
+        streamReader.ReadToEnd().ShouldBe(fileContents);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class PackageStorageTest
         var package = packageStorage.GetPackageManifest("Foo", new NuGetVersion(1, 0, 0));
 
         using var streamReader = new StreamReader(package);
-        streamReader.ReadToEnd().Should().Be(fileContents);
+        streamReader.ReadToEnd().ShouldBe(fileContents);
     }
 
     [Fact]
@@ -58,10 +58,10 @@ public class PackageStorageTest
         await packageStorage.PutPackage("Foo", new NuGetVersion(1, 0, 0), stream);
 
         var filePath = Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nupkg");
-        filesystem.File.Exists(filePath).Should().BeTrue();
+        filesystem.File.Exists(filePath).ShouldBeTrue();
 
         var actualContents = filesystem.File.ReadAllText(filePath);
-        actualContents.Should().Be(fileContents);
+        actualContents.ShouldBe(fileContents);
     }
 
     [Fact]
@@ -78,10 +78,10 @@ public class PackageStorageTest
         await packageStorage.PutPackageManifest("Foo", new NuGetVersion(1, 0, 0), stream);
 
         var filePath = Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nuspec");
-        filesystem.File.Exists(filePath).Should().BeTrue();
+        filesystem.File.Exists(filePath).ShouldBeTrue();
 
         var actualContents = filesystem.File.ReadAllText(filePath);
-        actualContents.Should().Be(fileContents);
+        actualContents.ShouldBe(fileContents);
     }
 
     [Fact]
@@ -100,11 +100,11 @@ public class PackageStorageTest
 
         packageStorage.DeletePackage("Foo", new NuGetVersion(1, 0, 0));
 
-        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nupkg")).Should().BeFalse();
-        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nuspec")).Should().BeFalse();
+        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nupkg")).ShouldBeFalse();
+        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nuspec")).ShouldBeFalse();
 
-        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/2.0.0/Foo.2.0.0.nupkg")).Should().BeTrue();
-        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/2.0.0/Foo.2.0.0.nuspec")).Should().BeTrue();
+        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/2.0.0/Foo.2.0.0.nupkg")).ShouldBeTrue();
+        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/2.0.0/Foo.2.0.0.nuspec")).ShouldBeTrue();
     }
 
     [Fact]
@@ -121,8 +121,8 @@ public class PackageStorageTest
 
         packageStorage.DeletePackage("Foo", new NuGetVersion(1, 0, 0));
 
-        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nupkg")).Should().BeFalse();
-        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nuspec")).Should().BeFalse();
-        filesystem.Directory.Exists(Path.Combine(storageRootDir, "f/Foo")).Should().BeFalse();
+        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nupkg")).ShouldBeFalse();
+        filesystem.File.Exists(Path.Combine(storageRootDir, "f/Foo/1.0.0/Foo.1.0.0.nuspec")).ShouldBeFalse();
+        filesystem.Directory.Exists(Path.Combine(storageRootDir, "f/Foo")).ShouldBeFalse();
     }
 }
