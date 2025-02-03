@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using Anna.Api.Extensions;
 using Anna.Api.Resources;
 using Anna.Common;
 using Anna.Index;
@@ -34,9 +35,8 @@ public class Program
 
         services.AddDbContext<IndexContext>(options =>
         {
-            var dbPath = EnvironmentUtility.GetRequiredEnvironmentVariable(Index.EnvironmentConstants.AnnaIndexDbPath);
-
-            options.UseSqlite($"Data Source={dbPath}");
+            var conn = EnvironmentUtility.GetRequiredEnvironmentVariable(Index.EnvironmentConstants.AnnaIndexDbConnectionString);
+            options.UseNpgsql(conn);
         });
 
         services.AddSingleton<IResourceProvider, ResourceProvider>();
@@ -60,6 +60,7 @@ public class Program
             app.UseDeveloperExceptionPage();
         }
 
+        app.UseMigrations();
         app.UseRouting();
 
         app.UseHttpsRedirection();

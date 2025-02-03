@@ -92,7 +92,7 @@ public sealed class PackageSteps
 
     private async Task MakePackageAvailable(string packageName, string packageVersion)
     {
-        if (PackageContext.AvailableLocalPackages.ContainsKey(new Tuple<string, string>(packageName, packageVersion)))
+        if (this._packageContext.AvailableLocalPackages.ContainsKey(new Tuple<string, string>(packageName, packageVersion)))
         {
             return;
         }
@@ -112,12 +112,12 @@ public sealed class PackageSteps
 
         await resp.Content.CopyToAsync(fileStream);
 
-        PackageContext.AvailableLocalPackages.Add(new Tuple<string, string>(packageName, packageVersion), packagePath);
+        this._packageContext.AvailableLocalPackages.Add(new Tuple<string, string>(packageName, packageVersion), packagePath);
     }
 
     private async Task UploadPackage(string packageName, string packageVersion)
     {
-        if (PackageContext.AvailableRemotePackages.Contains(new Tuple<string, string>(packageName, packageVersion)))
+        if (this._packageContext.AvailableRemotePackages.Contains(new Tuple<string, string>(packageName, packageVersion)))
         {
             this._httpContext.Response = new HttpResponseMessage { StatusCode = HttpStatusCode.Accepted };
             return;
@@ -125,7 +125,7 @@ public sealed class PackageSteps
 
         var content = new MultipartFormDataContent();
 
-        var packageFile = PackageContext.AvailableLocalPackages[new Tuple<string, string>(packageName, packageVersion)];
+        var packageFile = this._packageContext.AvailableLocalPackages[new Tuple<string, string>(packageName, packageVersion)];
         var package = new StreamContent(File.OpenRead(packageFile));
 
         content.Add(package, "package", Path.GetFileName(packageFile));
@@ -138,7 +138,7 @@ public sealed class PackageSteps
 
         if (this._httpContext.Response.IsSuccessStatusCode)
         {
-            PackageContext.AvailableRemotePackages.Add(new Tuple<string, string>(packageName, packageVersion));
+            this._packageContext.AvailableRemotePackages.Add(new Tuple<string, string>(packageName, packageVersion));
         }
         Thread.Sleep(1000);
     }

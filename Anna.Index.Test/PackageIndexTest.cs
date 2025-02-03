@@ -5,28 +5,41 @@ using System.Threading.Tasks;
 using Anna.Index.Db;
 using Anna.Index.Exceptions;
 using Anna.Index.Models;
+using Anna.Test.Common;
+using DotNet.Testcontainers.Builders;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Versioning;
 using Shouldly;
+using Testcontainers.PostgreSql;
 using Version = Anna.Index.Models.Version;
 
 namespace Anna.Index.Test;
 
-public class PackageIndexTest : IDisposable
+public class PackageIndexTest : IAsyncLifetime
 {
-    private IndexContext _dbContext;
-    private PackageIndex _packageIndex;
+    private PostgreSqlContainer _pgContainer = null!;
+    private IndexContext _dbContext = null!;
+    private PackageIndex _packageIndex = null!;
 
-    public PackageIndexTest()
+    public async Task InitializeAsync()
     {
+        this._pgContainer = new PostgreSqlBuilder()
+            .WithImage(TestConstants.PostgreSqlImage)
+            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new PostgreSqlWaitStrategy(), o => o.WithTimeout(TimeSpan.FromMinutes(1)))).Build();
+        await this._pgContainer.StartAsync();
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<IndexContext>();
-        dbContextOptionsBuilder.UseSqlite("Data Source=:memory:;");
+        dbContextOptionsBuilder.UseNpgsql(this._pgContainer.GetConnectionString());
 
         this._dbContext = new IndexContext(dbContextOptionsBuilder.Options);
-        this._dbContext.Database.OpenConnection();
-        this._dbContext.Database.Migrate();
+        await this._dbContext.Database.OpenConnectionAsync();
+        await this._dbContext.Database.MigrateAsync();
 
         this._packageIndex = new PackageIndex(this._dbContext);
+    }
+
+    public async Task DisposeAsync()
+    {
+        await this._pgContainer.DisposeAsync();
     }
 
     [Fact]
