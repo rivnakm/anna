@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Anna.Api.Models;
 using Anna.Api.Resources;
@@ -29,6 +31,7 @@ public class IndexController : ControllerBase
             Resources = this._resourceProvider.GetResources()
                 .Select(res =>
                 {
+                    Console.WriteLine(JsonSerializer.Serialize(HttpContext.Request.Headers.ToDictionary()));
                     var scheme = HttpContext.Request.Scheme;
                     if (HttpContext.Request.Headers.TryGetValue("x-forwarded-proto", out var schemeValues))
                     {
