@@ -29,6 +29,11 @@ public class IndexController : ControllerBase
             Resources = this._resourceProvider.GetResources()
                 .Select(res =>
                 {
+                    var scheme = HttpContext.Request.Scheme;
+                    if (HttpContext.Request.Headers.TryGetValue("x-forwarded-proto", out var schemeValues))
+                    {
+                        scheme = schemeValues.First();
+                    }
                     return new IndexDto.Resource
                     {
                         Id = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{res.Id}",
