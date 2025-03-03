@@ -7,6 +7,7 @@ using Anna.Index;
 using Anna.Index.Db;
 using Anna.Storage;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,6 +20,12 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.WebHost.ConfigureKestrel(options =>
+        {
+            options.Limits.MaxRequestBodySize = null;
+        });
+
         var services = builder.Services;
 
         services.AddControllers().AddJsonOptions(options =>
