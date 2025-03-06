@@ -23,6 +23,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.IntegrationTests", "An
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Test.Common", "Anna.Test.Common\Anna.Test.Common.csproj", "{939FB3A0-7C94-41CB-814B-AB5FD5EE3950}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Anna.Web", "Anna.Web\Anna.Web.csproj", "{CE6C5904-4363-4F26-8B1A-30662C8B6671}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{223C7754-4A8C-4AC5-8872-80A6D5BA8B46}"
+	ProjectSection(SolutionItems) = preProject
+		container-compose.yaml = container-compose.yaml
+		Containerfile = Containerfile
+		Containerfile-web = Containerfile-web
+		Caddyfile = Caddyfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +82,9 @@ Global
 		{939FB3A0-7C94-41CB-814B-AB5FD5EE3950}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{939FB3A0-7C94-41CB-814B-AB5FD5EE3950}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{939FB3A0-7C94-41CB-814B-AB5FD5EE3950}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE6C5904-4363-4F26-8B1A-30662C8B6671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE6C5904-4363-4F26-8B1A-30662C8B6671}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE6C5904-4363-4F26-8B1A-30662C8B6671}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE6C5904-4363-4F26-8B1A-30662C8B6671}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

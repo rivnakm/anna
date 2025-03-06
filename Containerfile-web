@@ -1,0 +1,29 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 as build
+
+RUN apt update && apt install -y nodejs python3
+
+WORKDIR /usr/src/anna
+COPY . .
+
+# TODO: set api url
+
+RUN wget -qO- https://get.pnpm.io/install.sh | ENV="$HOME/.bashrc" SHELL="$(which bash)" bash -
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH=$PATH:$PNPM_HOME
+
+RUN dotnet tool restore
+RUN dotnet restore
+
+RUN dotnet workload install wasm-tools
+
+RUN dotnet publish --no-restore --configuration Release Anna.Web
+
+FROM caddy:latest
+
+COPY --from=build /usr/src/anna/Anna.Web/bin/Release/net8.0/publish/wwwroot /srv
+COPY Caddyfile /etc/caddy/Caddyfile
+
+RUN mkdir -pv /data
+ENV ANNA_STORAGE_ROOT_DIR="/data/packages"
+
+ENTRYPOINT ["dotnet", "Anna.Api.dll"]

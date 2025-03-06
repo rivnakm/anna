@@ -6,7 +6,9 @@ COPY . .
 RUN dotnet tool restore
 RUN dotnet restore
 
-RUN dotnet publish --no-restore --configuration Release
+# TODO: set CORS url
+
+RUN dotnet publish --no-restore --configuration Release Anna.Api
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 

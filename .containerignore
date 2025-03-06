@@ -1,9 +1,14 @@
+# Containerfiles
+Containerfile*
+
 # Git
 .git/
 
 # Build artifacts
 bin/
 obj/
+node_modules/
+tailwind.css
 
 # Testing artifacts
 TestResults/
