@@ -21,6 +21,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+
       - name: dotnet restore
         run: |
           dotnet tool restore
