@@ -14,8 +14,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 WORKDIR /app
 COPY --from=build /usr/src/anna/Anna.Api/bin/Release/net8.0/publish .
+COPY container-entrypoint.sh .
 
 RUN mkdir -pv /data
 ENV ANNA_STORAGE_ROOT_DIR="/data/packages"
 
-ENTRYPOINT ["dotnet", "Anna.Api.dll"]
+ENTRYPOINT ["/bin/bash", "container-entrypoint.sh"]

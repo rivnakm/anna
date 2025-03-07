@@ -16,6 +16,8 @@ public sealed class PackageSteps
     private readonly HttpContext _httpContext;
     private readonly PackageContext _packageContext;
 
+    private record NuGetPackage(string Id, string Version);
+
     public PackageSteps(HttpContext httpContext, PackageContext packageContext)
     {
         this._httpContext = httpContext;
@@ -33,6 +35,17 @@ public sealed class PackageSteps
     {
         await this.MakePackageAvailable(packageName, packageVersion);
         await this.UploadPackage(packageName, packageVersion);
+    }
+
+    [Given("I have uploaded the following packages")]
+    public async Task GivenIHaveUploadedTheFollowingPackages(DataTable table)
+    {
+        var packages = table.CreateSet<NuGetPackage>();
+        foreach (var package in packages)
+        {
+            await this.MakePackageAvailable(package.Id, package.Version);
+            await this.UploadPackage(package.Id, package.Version);
+        }
     }
 
     [When(@"^I upload the package ([a-zA-Z.]+)@([a-zA-Z0-9.]+)$")]
@@ -130,11 +143,13 @@ public sealed class PackageSteps
 
         content.Add(package, "package", Path.GetFileName(packageFile));
 
-        this._httpContext.Request.Content = content;
-
-        this._httpContext.Request.RequestUri = new Uri("/packagepublish/v2", UriKind.Relative);
-        this._httpContext.Request.Method = HttpMethod.Put;
-        this._httpContext.Response = await this._httpContext.HttpClient.SendAsync(this._httpContext.Request);
+        var req = new HttpRequestMessage
+        {
+            Content = content,
+            Method = HttpMethod.Put,
+            RequestUri = new Uri("/packagepublish/v2", UriKind.Relative),
+        };
+        this._httpContext.Response = await this._httpContext.HttpClient.SendAsync(req);
 
         if (this._httpContext.Response.IsSuccessStatusCode)
         {

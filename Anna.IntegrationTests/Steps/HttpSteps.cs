@@ -41,7 +41,7 @@ public sealed class HttpSteps
     [Then(@"^the response status code should be (\d{3})$")]
     public void ThenTheResponseStatusCodeShouldBe(int statusCode)
     {
-        this._httpContext.Response.StatusCode.ShouldBe((HttpStatusCode)statusCode);
+        this._httpContext.Response.StatusCode.ShouldBe((HttpStatusCode)statusCode, this._httpContext.Response.ReasonPhrase);
     }
 
     [Then(@"^the response content type should be ([a-zA-Z0-9/.\-+]+)$")]

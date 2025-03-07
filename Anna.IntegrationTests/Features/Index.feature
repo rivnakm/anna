@@ -8,3 +8,4 @@ Feature: Service Index
     And The index should contain a PackageBaseAddress/3.0.0 resource
     And The index should contain a PackagePublish/2.0.0 resource
     And The index should contain a RegistrationsBaseUrl/3.6.0 resource
+    And The index should contain a SearchQueryService/3.5.0 resource

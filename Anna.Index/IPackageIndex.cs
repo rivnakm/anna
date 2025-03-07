@@ -16,4 +16,9 @@ public interface IPackageIndex
     IAsyncEnumerable<NuGetVersion> GetVersions(string lowerName);
     Task<string> GetPackageName(string lowerName);
     Task<CatalogEntry> GetCatalog(string lowerName, NuGetVersion version);
+    
+    // SearchQueryService
+    Task<int> CountPackages(string query, bool prerelease);
+
+    Task<IEnumerable<Package>> QueryPackages(string query, int skip, int take, bool prerelease);
 }

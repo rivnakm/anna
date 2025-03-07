@@ -17,7 +17,6 @@
       "applicationUrl": "http://localhost:5239",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ANNA_INDEX_DB_PATH": "/home/michael/Code/anna/.test/index.db",
         "ANNA_STORAGE_ROOT_DIR": "/home/michael/Code/anna/.test/packages"
       }
     },

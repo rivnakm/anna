@@ -25,5 +25,17 @@
     <Target Name="TailwindCssGenerate" BeforeTargets="PreBuildEvent" Inputs="@(TailwindContent)" Outputs="wwwroot/css/tailwind.css">
         <Exec Command="pnpx @tailwindcss/cli --minify --input $(ProjectDir)wwwroot/css/tailwind.in.css --output $(ProjectDir)wwwroot/css/tailwind.css"/>
     </Target>
+    
+    <ItemGroup>
+        <TailwindArtifacts Include="wwwroot/css/tailwind.css" />
+    </ItemGroup>
+    
+    <Target Name="TailwindCssClean" AfterTargets="Clean">
+        <Delete Files="@(TailwindArtifacts)" />
+    </Target>
+    
+    <Target Name="NodeModulesClean" AfterTargets="Clean">
+        <RemoveDir Directories="node_modules" />
+    </Target>
 
 </Project>

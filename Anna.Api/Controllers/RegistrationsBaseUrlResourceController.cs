@@ -92,25 +92,25 @@ public class RegistrationsBaseUrlResourceController : ResourceController
     [Route("page/{lowerId}/{minVersion}/index.json")]
     [HttpGet]
     [HttpHead]
-    public async Task GetRegistrationPage(string lowerId, string minVersion)
+    public Task<IActionResult> GetRegistrationPage(string lowerId, string minVersion)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IActionResult>(new StatusCodeResult(StatusCodes.Status501NotImplemented));
     }
 
     [Route("leaf/{lowerId}/{version}/index.json")]
     [HttpGet]
     [HttpHead]
-    public async Task GetRegistrationLeaf(string lowerId, string version)
+    public Task<IActionResult> GetRegistrationLeaf(string lowerId, string version)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IActionResult>(new StatusCodeResult(StatusCodes.Status501NotImplemented));
     }
 
     [Route("catalog/{lowerId}/{version}/index.json")]
     [HttpGet]
     [HttpHead]
-    public async Task GetCatalogEntry(string lowerId, string version)
+    public Task<IActionResult> GetCatalogEntry(string lowerId, string version)
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IActionResult>(new StatusCodeResult(StatusCodes.Status501NotImplemented));
     }
 
     private async Task<RegistrationLeafDto> GetRegistrationLeaf(string lowerName, NuGetVersion version)

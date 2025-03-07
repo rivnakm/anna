@@ -381,19 +381,4 @@ public class PackageIndexTest : IAsyncLifetime
 
         await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.RemovePackage(packageName, new NuGetVersion(2, 0, 0)));
     }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            this._dbContext.Dispose();
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
 }

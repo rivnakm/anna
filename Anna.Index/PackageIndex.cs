@@ -4,10 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Anna.Index.Db;
 using Anna.Index.Exceptions;
+using Anna.Index.Extensions;
 using Anna.Index.Models;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Versioning;
-using Version = Anna.Index.Models.Version;
+using Version=Anna.Index.Models.Version;
 
 namespace Anna.Index;
 
@@ -49,8 +50,8 @@ public class PackageIndex : IPackageIndex
     public async Task UnlistPackage(string name, NuGetVersion version)
     {
         var packageVersion = (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))?.Versions
-            .SingleOrDefault(v => v.PackageVersion == version)
-            ?? throw new PackageNotFoundException();
+                             .SingleOrDefault(v => v.PackageVersion == version) ??
+                             throw new PackageNotFoundException();
 
         packageVersion.Unlisted = true;
 
@@ -60,8 +61,8 @@ public class PackageIndex : IPackageIndex
     public async Task RelistPackage(string name, NuGetVersion version)
     {
         var packageVersion = (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))?.Versions
-            .SingleOrDefault(v => v.PackageVersion == version)
-            ?? throw new PackageNotFoundException();
+                             .SingleOrDefault(v => v.PackageVersion == version) ??
+                             throw new PackageNotFoundException();
 
         packageVersion.Unlisted = false;
 
@@ -72,11 +73,11 @@ public class PackageIndex : IPackageIndex
     {
         var package = await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name);
         var packageVersion = package?.Versions
-            .SingleOrDefault(v => v.PackageVersion == version)
-            ?? throw new PackageNotFoundException();
+                                 .SingleOrDefault(v => v.PackageVersion == version) ??
+                             throw new PackageNotFoundException();
 
         package.Versions.Remove(packageVersion);
-        if (package.Versions.Count() == 0)
+        if (package.Versions.Count == 0)
         {
             this._dbContext.Packages.Remove(package);
         }
@@ -124,4 +125,30 @@ public class PackageIndex : IPackageIndex
             PackageId = package.Name
         };
     }
+
+    public async Task<int> CountPackages(string query, bool prerelease)
+    {
+        return await this._dbContext.Packages
+            .Include(p => p.Versions)
+            .ToAsyncEnumerable()
+            .Where(p => p.MatchesSearch(query))
+            .Where(p => prerelease || p.Versions.Any(v => !v.PackageVersion.IsPrerelease))
+            .CountAsync();
+    }
+
+    public async Task<IEnumerable<Package>> QueryPackages(string query, int skip, int take, bool prerelease)
+    {
+        IQueryable<Package> dbQuery = this._dbContext.Packages
+            .Include(p => p.Versions);
+        
+        var packages = dbQuery.ToAsyncEnumerable()
+            .Where(p => p.MatchesSearch(query));
+        if (!prerelease)
+        {
+            packages = packages.Where(p => p.Versions.Any(v => !v.PackageVersion.IsPrerelease));
+        }
+        
+        return await packages.Skip(skip).Take(take).ToListAsync();
+    }
+
 }

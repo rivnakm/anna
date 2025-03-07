@@ -1,12 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <UserSecretsId>c64dfb63-dd86-47c6-958a-a40a8cce18d2</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
     <PackageReference Include="NuGet.Packaging" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>

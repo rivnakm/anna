@@ -1,7 +1,7 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace Anna.Index.Db;
 
@@ -11,7 +11,8 @@ public class IndexContextFactory : IDesignTimeDbContextFactory<IndexContext>
     public IndexContext CreateDbContext(string[] args)
     {
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<IndexContext>();
-        var conn = Environment.GetEnvironmentVariable(EnvironmentConstants.AnnaIndexDbConnectionString);
+        var config = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<IndexContext>().Build();
+        var conn = config.GetConnectionString("Index");
 
         if (conn is null)
         {

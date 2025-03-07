@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -58,7 +59,7 @@ public partial class ContainerHook
         context.ApiContainer = new ContainerBuilder()
             .WithImage(_image)
             .WithImagePullPolicy(PullPolicy.Never)
-            .WithEnvironment(Anna.Index.EnvironmentConstants.AnnaIndexDbConnectionString, connString)
+            .WithEnvironment("ConnectionStrings__Index", connString)
             .WithNetwork(context.Network)
             .WithPortBinding(HttpPort, true)
             .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new BoundPortHttpRequestWaitStrategy(HttpPort, "/healthcheck"), w => w.WithTimeout(TimeSpan.FromMinutes(1))))
@@ -77,7 +78,19 @@ public partial class ContainerHook
     {
         if (context.ApiContainer is not null)
         {
+            var (stdout, stderr) = await context.ApiContainer.GetLogsAsync();
             await context.ApiContainer.StopAsync();
+
+            var timestamp = DateTime.Now.ToString("o");
+            var projectDirectory = Directory.GetParent(Environment.CurrentDirectory)!.Parent!.Parent!.FullName;
+            var logsDirectory = Path.Combine(projectDirectory, "logs");
+            if (!Directory.Exists(logsDirectory))
+            {
+                Directory.CreateDirectory(logsDirectory);
+            }
+            
+            await File.WriteAllTextAsync(Path.Combine(logsDirectory, $"api-container-{timestamp}.out.txt"), stdout);
+            await File.WriteAllTextAsync(Path.Combine(logsDirectory, $"api-container-{timestamp}.err.txt"), stderr);
         }
 
         if (context.DbContainer is not null)
@@ -88,7 +101,7 @@ public partial class ContainerHook
 
     [GeneratedRegex("Host=(.*?);")]
     private static partial Regex ConnectionStringHostRegex();
-    
+
     [GeneratedRegex("Port=(.*?);")]
     private static partial Regex ConnectionStringPortRegex();
 }
