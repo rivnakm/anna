@@ -10,6 +10,8 @@ services:
       - "8080:8080"
     networks:
       - anna
+    volumes:
+      - package-data:/data/packages:Z
     environment:
       DB_HOST: anna-db
       DB_PORT: "5432"
@@ -34,6 +36,8 @@ services:
     hostname: anna-db
     networks:
       - anna
+    volumes:
+      - db-data:/var/lib/postgresql/data:Z
     environment:
       POSTGRES_DB: anna
       POSTGRES_USER: anna
@@ -47,3 +51,7 @@ services:
 
 networks:
   anna:
+    
+volumes:
+  db-data:
+  package-data:

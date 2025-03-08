@@ -1,20 +1,18 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider/>
+<MudThemeProvider @ref="@this._mudThemeProvider" @bind-IsDarkMode="@this._isDarkMode"/>
 <MudPopoverProvider/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
-    <MudAppBar>
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
-                       OnClick="@((e) => this.DrawerToggle())"/>
-        Anna
-    </MudAppBar>
-    <MudDrawer @bind-Open="@this._drawerOpen">
+    <MudDrawer Open="@(true)" Variant="@DrawerVariant.Persistent">
+        <MudDrawerHeader>
+            <MudText Typo="Typo.h6">Anna</MudText>
+        </MudDrawerHeader>
         <MudNavMenu>
-            <MudNavLink Href="/" Match="NavLinkMatch.All">Packages</MudNavLink>
-            <MudNavLink Href="/upload" Match="NavLinkMatch.Prefix">Upload</MudNavLink>
+            <MudNavLink Match="NavLinkMatch.All" Href="/" Icon="@Icons.Material.Outlined.Inventory2" IconColor="Color.Inherit">Packages</MudNavLink>
+            <MudNavLink Href="/upload" Icon="@Icons.Material.Outlined.FileUpload" IconColor="Color.Inherit">Upload</MudNavLink>
         </MudNavMenu>
     </MudDrawer>
     <MudMainContent>
@@ -25,10 +23,24 @@
 </MudLayout>
 
 @code {
-    bool _drawerOpen = true;
+    bool _isDarkMode;
+    private MudThemeProvider _mudThemeProvider = null!;
 
-    void DrawerToggle()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        this._drawerOpen = !this._drawerOpen;
+        if (firstRender)
+        {
+            this._isDarkMode = await this._mudThemeProvider.GetSystemPreference();
+            await this._mudThemeProvider.WatchSystemPreference(this.OnSystemPreferenceChanged);
+            StateHasChanged();
+        }
+    }
+
+    private Task OnSystemPreferenceChanged(bool newValue)
+    {
+        Console.WriteLine($"darkMode set to {newValue}");
+        this._isDarkMode = newValue;
+        StateHasChanged();
+        return Task.CompletedTask;
     }
 }

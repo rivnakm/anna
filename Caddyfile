@@ -3,7 +3,7 @@
 }
 
 :80, :443 {
-    header Blazor-Environment ${BLAZOR_ENVIRONMENT}
+    header Blazor-Environment {$BLAZOR_ENVIRONMENT}
     root wwwroot
     encode gzip
     try_files {path} /index.html
