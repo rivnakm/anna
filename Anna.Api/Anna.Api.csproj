@@ -10,6 +10,7 @@
         <PackageReference Include="Microsoft.AspNetCore.OpenApi"/>
         <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets"/>
         <PackageReference Include="NuGet.Packaging"/>
+        <PackageReference Include="Polly" />
         <PackageReference Include="Swashbuckle.AspNetCore"/>
     </ItemGroup>
 

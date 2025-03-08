@@ -27,6 +27,7 @@
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
     <PackageVersion Include="NuGet.Packaging" Version="6.12.1" />
     <PackageVersion Include="NuGet.Versioning" Version="6.12.1" />
+    <PackageVersion Include="Polly" Version="8.5.2" />
     <PackageVersion Include="Reqnroll.xUnit" Version="2.2.1" />
     <PackageVersion Include="RichardSzalay.MockHttp" Version="7.0.0" />
     <PackageVersion Include="Shouldly" Version="4.3.0" />

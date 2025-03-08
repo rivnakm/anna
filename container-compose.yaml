@@ -1,0 +1,49 @@
+services:
+  api:
+    build:
+      dockerfile: ./Containerfile
+    hostname: anna-api
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - anna
+    environment:
+      DB_HOST: anna-db
+      DB_PORT: "5432"
+      DB_NAME: anna
+      DB_USER: anna
+      DB_PASS: ${POSTGRES_PASSWORD:-password}
+      ANNA_WEB_DOMAINS: "http://localhost:5000;"
+
+  web:
+    build:
+      dockerfile: ./Containerfile-web
+    hostname: anna-web
+    ports:
+      - "5000:80"
+    networks:
+      - anna
+    environment:
+      ANNA_API_URL: http://localhost:8080/v3/index.json
+
+  db:
+    image: postgres:16-bookworm
+    hostname: anna-db
+    networks:
+      - anna
+    environment:
+      POSTGRES_DB: anna
+      POSTGRES_USER: anna
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d db_prod"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+networks:
+  anna:

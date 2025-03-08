@@ -1,0 +1,11 @@
+{
+    auto_https off
+}
+
+:80, :443 {
+    header Blazor-Environment ${BLAZOR_ENVIRONMENT}
+    root wwwroot
+    encode gzip
+    try_files {path} /index.html
+    file_server
+}

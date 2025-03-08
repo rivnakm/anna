@@ -1,0 +1,23 @@
+@page "/upload"
+@inject IAnnaClient AnnaClient
+
+<MudFileUpload T="IBrowserFile" FilesChanged="this.UploadFileAsync">
+    <ActivatorContent>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+            Upload Package
+        </MudButton>
+    </ActivatorContent>
+</MudFileUpload>
+
+@code {
+    private async Task UploadFileAsync(IBrowserFile? file)
+    {
+        if (file is null)
+        {
+            return;
+        }
+
+        await using var fileStream = file.OpenReadStream(long.MaxValue); // TODO: this is probably too high
+        await this.AnnaClient.UploadPackage(fileStream);
+    }
+}

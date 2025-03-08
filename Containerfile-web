@@ -18,12 +18,15 @@ RUN dotnet workload install wasm-tools
 
 RUN dotnet publish --no-restore --configuration Release Anna.Web
 
-FROM caddy:latest
+FROM debian:bookworm
 
-COPY --from=build /usr/src/anna/Anna.Web/bin/Release/net8.0/publish/wwwroot /srv
-COPY Caddyfile /etc/caddy/Caddyfile
+RUN apt update && apt install -y caddy python3
 
-RUN mkdir -pv /data
-ENV ANNA_STORAGE_ROOT_DIR="/data/packages"
+COPY --from=build /usr/src/anna/Anna.Web/bin/Release/net8.0/publish .
+COPY Caddyfile .
+COPY container-entrypoint-web.sh container-entrypoint.sh
+COPY scripts/set_api_url.py .
 
-ENTRYPOINT ["dotnet", "Anna.Api.dll"]
+ENV BLAZOR_ENVIRONMENT=Production
+
+ENTRYPOINT ["/bin/bash", "container-entrypoint.sh"]
