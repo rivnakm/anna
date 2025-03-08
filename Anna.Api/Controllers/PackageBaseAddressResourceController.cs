@@ -32,11 +32,11 @@ public class PackageBaseAddressResourceController : ResourceController
     {
         try
         {
-            var versions = await this._packageIndex.GetVersions(lowerId).Select(v => v.ToString()).ToListAsync();
+            var versions = (await this._packageIndex.GetVersions(lowerId)).Select(v => v.ToString());
 
             var response = new PackageVersions
             {
-                Versions = versions
+                Versions = versions.ToList()
             };
 
             return new OkObjectResult(response);
@@ -61,8 +61,8 @@ public class PackageBaseAddressResourceController : ResourceController
         try
         {
             var name = await this._packageIndex.GetPackageName(lowerId);
-            var version = await this._packageIndex.GetVersions(lowerId)
-                .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
+            var version = (await this._packageIndex.GetVersions(lowerId))
+                .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
             if (version is null)
             {
                 return new NotFoundResult();
@@ -96,8 +96,8 @@ public class PackageBaseAddressResourceController : ResourceController
         try
         {
             var name = await this._packageIndex.GetPackageName(lowerId);
-            var version = await this._packageIndex.GetVersions(lowerId)
-                .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
+            var version = (await this._packageIndex.GetVersions(lowerId))
+                .SingleOrDefault(v => v.ToString().ToLowerInvariant() == lowerVersion);
             if (version is null)
             {
                 return new NotFoundResult();

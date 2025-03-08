@@ -48,7 +48,7 @@ public class PackageIndexTest : IAsyncLifetime
     public async Task TestGetVersions_NoMatch_ReturnsEmpty()
     {
         await Should.ThrowAsync<PackageNotFoundException>(
-        async () => await this._packageIndex.GetVersions("package").ToListAsync());
+        async () => await this._packageIndex.GetVersions("package"));
     }
 
     [Fact]
@@ -74,7 +74,43 @@ public class PackageIndexTest : IAsyncLifetime
         await this._dbContext.AddAsync(package);
         await this._dbContext.SaveChangesAsync();
 
-        var versions = await this._packageIndex.GetVersions("package").ToListAsync();
+        var versions = (await this._packageIndex.GetVersions("package")).ToList();
+        versions.ShouldBeEquivalentTo(package.Versions.Select(v => v.PackageVersion).ToList());
+    }
+
+    [Fact]
+    public async Task TestGetVersions_MatchesOnly()
+    {
+        var package = new Package
+        {
+            Name = "Package",
+            LowerName = "package",
+            Versions = new List<Version>
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                }
+            }
+        };
+        var packageB = new Package
+        {
+            Name = "PackageB",
+            LowerName = "packageB",
+            Versions = new List<Version>
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(2, 0, 0)
+                }
+            }
+        };
+
+        await this._dbContext.AddAsync(package);
+        await this._dbContext.AddAsync(packageB);
+        await this._dbContext.SaveChangesAsync();
+
+        var versions = (await this._packageIndex.GetVersions("package")).ToList();
         versions.ShouldBeEquivalentTo(package.Versions.Select(v => v.PackageVersion).ToList());
     }
 

@@ -22,6 +22,8 @@ public sealed class PackageSteps
         this._packageContext = packageContext;
     }
 
+    private record PackageVersion(string Version);
+
     [Given(@"^I have a \.nupkg file for ([a-zA-Z.]+)@([a-zA-Z0-9.]+)$")]
     public async Task GivenIHaveANupkgFileFor(string packageName, string packageVersion)
     {
@@ -71,11 +73,37 @@ public sealed class PackageSteps
         await this._clientContext.AnnaClient.DeletePackage(packageName, packageVersion);
     }
 
+    [When("^I get a list of package versions for ([a-zA-Z.]+)")]
+    public async Task WhenIGetAListOfPackageVersions(string packageName)
+    {
+        this._packageContext.VersionList = (await this._clientContext.AnnaClient.GetVersions(packageName)).Versions;
+    }
+
     [Then(@"^I can relist the package ([a-zA-Z.]+)@([a-zA-Z0-9.]+)$")]
     public async Task ThenICanRelistThePackage(string packageName, string packageVersion)
     {
         await this._clientContext.AnnaClient.RestorePackage(packageName, packageVersion);
     }
+
+    [Then(@"^the list of package versions should contain (\d+) item(?:s)?$")]
+    public void ThenTheListOfPackageVersionsShouldContain(int expectedCount)
+    {
+        this._packageContext.VersionList.ShouldNotBeNull();
+        this._packageContext.VersionList.Count.ShouldBe(expectedCount);
+    }
+    
+    [Then("the list of package versions should contain the following versions")]
+    public void ThenTheListOfPackageVersionsShouldContainTheFollowingVersions(DataTable table)
+    {
+        this._packageContext.VersionList.ShouldNotBeNull();
+        
+        var versions = table.CreateSet<PackageVersion>();
+        foreach (var version in versions)
+        {
+            this._packageContext.VersionList.ShouldContain(version.Version);
+        }
+    }
+
 
     private async Task MakePackageAvailable(string packageName, string packageVersion)
     {

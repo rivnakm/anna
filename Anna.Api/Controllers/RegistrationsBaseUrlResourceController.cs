@@ -40,7 +40,7 @@ public class RegistrationsBaseUrlResourceController : ResourceController
     {
         try
         {
-            var versions = await this._packageIndex.GetVersions(lowerId).ToListAsync();
+            var versions = (await this._packageIndex.GetVersions(lowerId)).ToList();
 
             versions.Sort();
             var inlinePages = versions.Count < 2 * PageSize;

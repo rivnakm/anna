@@ -88,7 +88,7 @@ public class PackageIndex : IPackageIndex
         await this._dbContext.SaveChangesAsync();
     }
 
-    public async IAsyncEnumerable<NuGetVersion> GetVersions(string lowerName)
+    public async Task<IEnumerable<NuGetVersion>> GetVersions(string lowerName)
     {
         var package = await this._dbContext.Packages.Include(p => p.Versions)
             .SingleOrDefaultAsync(p => p.LowerName == lowerName);
@@ -97,10 +97,7 @@ public class PackageIndex : IPackageIndex
             throw new PackageNotFoundException();
         }
 
-        await foreach (var version in this._dbContext.Versions.AsAsyncEnumerable())
-        {
-            yield return version.PackageVersion;
-        }
+        return package.Versions.Select(v => v.PackageVersion);
     }
 
     public async Task<string> GetPackageName(string lowerName)

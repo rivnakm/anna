@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Anna.Client.Models;
+using Anna.Common.Models;
 using Anna.Common.Models.RegistrationIndex;
 using Anna.Common.Models.SearchQueryService;
 using Index = Anna.Common.Models.Index;
@@ -13,6 +15,7 @@ public interface IAnnaClient
     Task<bool> CheckHealth();
     Task<Index> GetIndex();
 
+    Task<PackageVersions> GetVersions(string packageId);
     Task<DownloadPackageResponse> DownloadPackage(string packageId, string packageVersion);
     Task<DownloadPackageResponse> DownloadPackageSpec(string packageId, string packageVersion);
 

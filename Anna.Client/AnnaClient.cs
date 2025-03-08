@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Anna.Client.Extensions;
 using Anna.Client.Models;
+using Anna.Common.Models;
 using Anna.Common.Models.RegistrationIndex;
 using Anna.Common.Models.SearchQueryService;
 using Flurl;
@@ -42,6 +44,18 @@ public class AnnaClient : IAnnaClient
 
         return await resp.Content.ReadFromJsonAsync<Index>() ??
                throw new InvalidDataException("Unable to deserialize message");
+    }
+    
+    public async Task<PackageVersions> GetVersions(string packageId)
+    {
+        packageId = packageId.ToLowerInvariant();
+        var packageBaseUrl = await this.GetResourceUrl("PackageBaseAddress", "3.0.0");
+        var packageUrl = packageBaseUrl.AppendPathSegments(packageId, "index.json");
+        
+        var resp = await this._httpClient.GetAsync(packageUrl);
+        resp.EnsureSuccessStatusCode();
+        
+        return await resp.Content.ReadFromJsonAsync<PackageVersions>() ?? throw new InvalidDataException("Unable to deserialize message");
     }
 
     public async Task<DownloadPackageResponse> DownloadPackage(string packageId, string packageVersion)

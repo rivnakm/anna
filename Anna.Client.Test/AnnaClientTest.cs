@@ -64,6 +64,27 @@ public class AnnaClientTest
         this._mockHttp.VerifyNoOutstandingExpectation();
     }
 
+    [Fact]
+    public async Task TestGetVersions()
+    {
+        const string id = "Azure.Core";
+        const string lowerId = "azure.core";
+        const string version = "1.45.0";
+        this._mockHttp.Expect(this._annaClientOptions.IndexUrl.ToString())
+            .Respond("application/json",
+                     "{\"version\": \"3.0.0\", \"resources\": [{\"@id\": \"http://localhost/packagebaseaddress/v3\", \"@type\": \"PackageBaseAddress/3.0.0\"}]}");
+
+        this._mockHttp.Expect($"http://localhost/packagebaseaddress/v3/{lowerId}/index.json")
+            .Respond("application/json", $"{{\"versions\": [\"{version}\"]}}");
+
+        var response = await this._annaClient.GetVersions(id);
+        response.ShouldNotBeNull();
+        response.Versions.ShouldHaveSingleItem();
+        response.Versions[0].ShouldBe(version);
+
+        this._mockHttp.VerifyNoOutstandingExpectation();
+    }
+
     [Theory]
     [InlineData("nupkg")]
     [InlineData("nuspec")]

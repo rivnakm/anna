@@ -13,7 +13,7 @@ public interface IPackageIndex
     Task RelistPackage(string name, NuGetVersion version);
     Task RemovePackage(string name, NuGetVersion version);
 
-    IAsyncEnumerable<NuGetVersion> GetVersions(string lowerName);
+    Task<IEnumerable<NuGetVersion>> GetVersions(string lowerName);
     Task<string> GetPackageName(string lowerName);
     Task<CatalogEntry> GetCatalog(string lowerName, NuGetVersion version);
 

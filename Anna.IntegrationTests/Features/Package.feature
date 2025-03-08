@@ -20,3 +20,19 @@ Feature: Package Publishing and Retrieval
         Given I have uploaded the package Microsoft.Extensions.DependencyInjection@9.0.0
         And I have unlisted the package Microsoft.Extensions.DependencyInjection@9.0.0
         Then I can relist the package Microsoft.Extensions.DependencyInjection@9.0.0
+
+    Scenario: Get a list of package versions
+        Given I have uploaded the following packages
+          | Id          | Version       |
+          | Azure.Core  | 1.45.0        |
+          | Azure.Core  | 1.44.1        |
+          | Azure.Core  | 1.44.0        |
+          | AWSSDK.Core | 3.7.402.14    |
+          | AWSSDK.Core | 4.0.0-preview |
+        When I get a list of package versions for Azure.Core
+        Then the list of package versions should contain 3 items
+        And the list of package versions should contain the following versions
+          | Version |
+          | 1.45.0  |
+          | 1.44.1  |
+          | 1.44.0  |

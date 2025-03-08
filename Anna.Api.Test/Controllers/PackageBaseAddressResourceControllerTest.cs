@@ -28,7 +28,7 @@ public class PackageBaseAddressResourceControllerTest
 
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
-        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(expectedVersions.ToAsyncEnumerable());
+        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(Task.FromResult<IEnumerable<NuGetVersion>>(expectedVersions));
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
         var resp = await controller.GetPackageVersions(packageLowerName);
@@ -39,7 +39,7 @@ public class PackageBaseAddressResourceControllerTest
         value.ShouldNotBeNull();
         value.ShouldBeOfType<PackageVersions>();
 
-        var pkgVersionsResp = (PackageVersions)value!;
+        var pkgVersionsResp = (PackageVersions)value;
 
         pkgVersionsResp.Versions.ShouldBe(expectedVersions.Select(v => v.ToString()).ToList());
     }
@@ -71,7 +71,7 @@ public class PackageBaseAddressResourceControllerTest
 
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
-        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(availableVersions.ToAsyncEnumerable());
+        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(Task.FromResult<IEnumerable<NuGetVersion>>(availableVersions));
         A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Returns(packageName);
         A.CallTo(() => packageStorage.GetPackage(packageName,
                                                  A<NuGetVersion>.That.Matches(
@@ -134,7 +134,7 @@ public class PackageBaseAddressResourceControllerTest
         };
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
-        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(expectedVersions.ToAsyncEnumerable());
+        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(Task.FromResult<IEnumerable<NuGetVersion>>(expectedVersions));
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
         var resp = await controller.GetPackageFile(packageLowerName, "3.0.0", $"{packageLowerName}.3.0.0");
@@ -159,7 +159,7 @@ public class PackageBaseAddressResourceControllerTest
 
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
-        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(availableVersions.ToAsyncEnumerable());
+        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(Task.FromResult<IEnumerable<NuGetVersion>>(availableVersions));
         A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Returns(packageName);
         A.CallTo(() => packageStorage.GetPackageManifest(packageName,
                                                          A<NuGetVersion>.That.Matches(
@@ -222,7 +222,7 @@ public class PackageBaseAddressResourceControllerTest
         };
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
-        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(expectedVersions.ToAsyncEnumerable());
+        A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(Task.FromResult<IEnumerable<NuGetVersion>>(expectedVersions));
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
         var resp = await controller.GetPackageManifest(packageLowerName, "3.0.0", $"{packageLowerName}.3.0.0");
