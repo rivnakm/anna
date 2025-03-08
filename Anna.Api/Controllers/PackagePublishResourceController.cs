@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -43,11 +44,11 @@ public class PackagePublishResourceController : ResourceController
         await using (var fileStream = System.IO.File.Open(tempPath, FileMode.Open))
         {
             // Read package from form data
-            var formContent = await this.HttpContext.Request.ReadFormAsync();
+            var formContent = await HttpContext.Request.ReadFormAsync();
             var packageFormFile = formContent.Files.FirstOrDefault();
             if (packageFormFile is null)
             {
-                return new BadRequestResult();
+                return new BadRequestObjectResult("Form content does not contain any files");
             }
 
             // Copy package to temp file
@@ -122,11 +123,11 @@ public class PackagePublishResourceController : ResourceController
         var nuGetVersion = NuGetVersion.Parse(version);
         try
         {
-            if (this.HttpContext.Request.Headers.TryGetValue("x-anna-hard-delete", out var stringVal)
-                    && bool.TryParse(stringVal, out var hardDelete)
-                    && hardDelete)
+            if (HttpContext.Request.Headers.TryGetValue("x-anna-hard-delete", out var stringVal)
+             && bool.TryParse(stringVal, out var hardDelete)
+             && hardDelete)
             {
-                System.Console.WriteLine("Hard deleting");
+                Console.WriteLine("Hard deleting");
                 await this._packageIndex.RemovePackage(id, nuGetVersion);
                 this._packageStorage.DeletePackage(id, nuGetVersion);
             }

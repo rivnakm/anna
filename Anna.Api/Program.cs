@@ -24,21 +24,18 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var config = builder.Configuration.AddEnvironmentVariables().AddUserSecrets<Program>().Build();
 
-        builder.WebHost.ConfigureKestrel(options =>
-        {
+        builder.WebHost.ConfigureKestrel(options => {
             options.Limits.MaxRequestBodySize = null;
         });
-        builder.Services.Configure<FormOptions>(options =>
-        {
+        builder.Services.Configure<FormOptions>(options => {
             options.MultipartBodyLengthLimit = long.MaxValue;
         });
 
         var services = builder.Services;
 
-        services.AddControllers().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            });
+        services.AddControllers().AddJsonOptions(options => {
+            options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        });
 
         services.AddAuthorization();
 
@@ -47,8 +44,7 @@ public class Program
 
         services.AddHealthChecks();
 
-        services.AddDbContext<IndexContext>(options =>
-        {
+        services.AddDbContext<IndexContext>(options => {
             var conn = config.GetConnectionString("Index");
             options.UseNpgsql(conn);
         });
@@ -56,7 +52,9 @@ public class Program
         services.AddSingleton<IResourceProvider, ResourceProvider>();
 
         services.AddScoped<IPackageIndex, PackageIndex>();
-        services.AddScoped<IPackageStorage, PackageStorage>(_ => new PackageStorage(EnvironmentUtility.GetRequiredEnvironmentVariable(Storage.EnvironmentConstants.AnnaStorageRootDir)));
+        services.AddScoped<IPackageStorage, PackageStorage>(
+        _ => new PackageStorage(
+        EnvironmentUtility.GetRequiredEnvironmentVariable(EnvironmentConstants.AnnaStorageRootDir)));
 
         // TODO: add exception middleware
 
@@ -65,8 +63,7 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI(options =>
-            {
+            app.UseSwaggerUI(options => {
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Anna API");
                 options.RoutePrefix = "api";
             });

@@ -1,8 +1,4 @@
-using System;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Anna.Api.Models.RegistrationIndex;
 using Anna.IntegrationTests.Contexts;
 using Reqnroll;
 using Shouldly;
@@ -12,30 +8,19 @@ namespace Anna.IntegrationTests.Steps;
 [Binding]
 public class RegistrationsSteps
 {
-    private readonly HttpContext _httpContext;
+    private readonly AnnaClientContext _clientContext;
     private readonly RegistrationsContext _registrationsContext;
 
-    public RegistrationsSteps(HttpContext httpContext, RegistrationsContext registrationsContext)
+    public RegistrationsSteps(AnnaClientContext clientContext, RegistrationsContext registrationsContext)
     {
-        this._httpContext = httpContext;
+        this._clientContext = clientContext;
         this._registrationsContext = registrationsContext;
     }
 
     [When(@"^I get the registration index for the package ([a-zA-Z.]+)$")]
     public async Task WhenIGetTheRegistrationIndexForThePackage(string packageName)
     {
-        var req = new HttpRequestMessage
-        {
-            RequestUri = new Uri($"/registrationbaseurl/v3.6/{packageName.ToLowerInvariant()}/index.json", UriKind.Relative),
-            Method = HttpMethod.Get
-        };
-
-        this._httpContext.Response = await this._httpContext.HttpClient.SendAsync(req);
-
-        if (this._httpContext.Response.IsSuccessStatusCode)
-        {
-            this._registrationsContext.RegistrationIndex = await this._httpContext.Response.Content.ReadFromJsonAsync<RegistrationIndexDto>();
-        }
+        this._registrationsContext.RegistrationIndex = await this._clientContext.AnnaClient.GetRegistrationIndex(packageName);
     }
 
     [Then(@"the registration index should contain (\d+) page(?:s)?")]
@@ -53,7 +38,7 @@ public class RegistrationsSteps
         var index = this._registrationsContext.RegistrationIndex;
 
         index.ShouldNotBeNull();
-        index.Items[pageNum-1].ShouldNotBeNull();
-        index.Items[pageNum-1].Items!.ShouldContain(l => l.CatalogEntry.Version.ToString() == version);
+        index.Items[pageNum - 1].ShouldNotBeNull();
+        index.Items[pageNum - 1].Items!.ShouldContain(l => l.CatalogEntry.Version.ToString() == version);
     }
 }

@@ -1,10 +1,11 @@
-using Anna.Api.Models.SearchQueryService;
+using Anna.Client.Models;
+using Anna.Common.Models.SearchQueryService;
 using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Anna.IntegrationTests.Contexts;
 
 public class SearchContext
 {
-    public SearchResponseDto? SearchResponse { get; set; }
-    public QueryBuilder? QueryBuilder { get; set; }
+    public SearchResponse? SearchResponse { get; set; }
+    public SearchRequest? SearchRequest { get; set; }
 }

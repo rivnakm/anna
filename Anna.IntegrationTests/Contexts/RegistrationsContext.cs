@@ -1,8 +1,8 @@
-using Anna.Api.Models.RegistrationIndex;
+using Anna.Common.Models.RegistrationIndex;
 
 namespace Anna.IntegrationTests.Contexts;
 
 public class RegistrationsContext
 {
-    public RegistrationIndexDto? RegistrationIndex { get; set; }
+    public RegistrationIndex? RegistrationIndex { get; set; }
 }

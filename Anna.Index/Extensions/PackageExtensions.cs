@@ -11,7 +11,7 @@ public static class PackageExtensions
         {
             return true;
         }
-        
+
         return package.Name.Contains(query, StringComparison.InvariantCultureIgnoreCase);
     }
 }

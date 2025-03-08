@@ -8,9 +8,9 @@ namespace Anna.Test.Common;
 
 public class BoundPortHttpRequestWaitStrategy : IWaitUntil
 {
+    private readonly string _endpoint;
     private readonly HttpClient _httpClient;
     private readonly int _port;
-    private readonly string _endpoint;
 
     public BoundPortHttpRequestWaitStrategy(int port, string endpoint)
     {

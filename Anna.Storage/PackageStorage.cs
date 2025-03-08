@@ -36,7 +36,9 @@ public class PackageStorage : IPackageStorage
 
     public async Task PutPackageManifest(string name, NuGetVersion version, Stream data)
     {
-        await this.CreateFile(Path.Combine(this.PackageDirectory(name, version), PackageManifestFileName(name, version)), data);
+        await this.CreateFile(
+        Path.Combine(this.PackageDirectory(name, version), PackageManifestFileName(name, version)),
+        data);
     }
 
     public void DeletePackage(string name, NuGetVersion version)
@@ -88,6 +90,7 @@ public class PackageStorage : IPackageStorage
         {
             this._filesystem.Directory.CreateDirectory(parentDir);
         }
+
         using var fileStream = this._filesystem.File.OpenWrite(path);
 
         await data.CopyToAsync(fileStream);

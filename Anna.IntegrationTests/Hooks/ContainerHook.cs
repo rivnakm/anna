@@ -1,14 +1,14 @@
 using System;
 using System.IO;
 using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Anna.Client;
 using Anna.IntegrationTests.Contexts;
 using Anna.Test.Common;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Images;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Reqnroll;
 using Testcontainers.PostgreSql;
 
@@ -17,8 +17,8 @@ namespace Anna.IntegrationTests.Hooks;
 [Binding]
 public partial class ContainerHook
 {
-    private static IImage? _image;
     private const ushort HttpPort = 8080;
+    private static IImage? _image;
 
     [BeforeTestRun]
     public static void BuildContainer()
@@ -33,7 +33,7 @@ public partial class ContainerHook
     }
 
     [BeforeScenario]
-    public async Task StartContainer(ContainerContext context, HttpContext httpContext)
+    public async Task StartContainer(ContainerContext context, AnnaClientContext annaClientContext)
     {
         // Create network
         context.Network = new NetworkBuilder().Build();
@@ -45,14 +45,17 @@ public partial class ContainerHook
             .WithNetwork(context.Network)
             .WithHostname(dbContainerHostname)
             .WithWaitStrategy(Wait.ForUnixContainer()
-                .AddCustomWaitStrategy(new PostgreSqlWaitStrategy(), m => m.WithTimeout(TimeSpan.FromMinutes(1))))
+                                  .AddCustomWaitStrategy(new PostgreSqlWaitStrategy(),
+                                                         waitStrategyModifier: m =>
+                                                             m.WithTimeout(TimeSpan.FromMinutes(1))))
             .Build();
         await context.DbContainer.StartAsync();
 
         // Connection string from the host isn't the same as what it would be from another container
         // same for the port
         // context.DbContainer.Hostname also doesn't return the container's hostname (bug?)
-        var connString = ConnectionStringHostRegex().Replace(context.DbContainer.GetConnectionString(), $"Host={dbContainerHostname};").Trim();
+        var connString = ConnectionStringHostRegex()
+            .Replace(context.DbContainer.GetConnectionString(), $"Host={dbContainerHostname};").Trim();
         connString = ConnectionStringPortRegex().Replace(connString, "Port=5432;").Trim();
 
         // Start API container
@@ -62,15 +65,23 @@ public partial class ContainerHook
             .WithEnvironment("ConnectionStrings__Index", connString)
             .WithNetwork(context.Network)
             .WithPortBinding(HttpPort, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new BoundPortHttpRequestWaitStrategy(HttpPort, "/healthcheck"), w => w.WithTimeout(TimeSpan.FromMinutes(1))))
+            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(
+                              new BoundPortHttpRequestWaitStrategy(HttpPort, "/healthcheck"),
+                              waitStrategyModifier: w => w.WithTimeout(TimeSpan.FromMinutes(1))))
             .Build();
 
         await context.ApiContainer.StartAsync();
 
-        httpContext.HttpClient = new HttpClient
+        var clientOptions = new AnnaClientOptions
         {
-            BaseAddress = new UriBuilder("http", context.ApiContainer.Hostname, context.ApiContainer.GetMappedPublicPort(HttpPort)).Uri
+            IndexUrl = new UriBuilder("http",
+                                      context.ApiContainer.Hostname,
+                                      context.ApiContainer.GetMappedPublicPort(HttpPort),
+                                      "v3/index.json").Uri
         };
+
+        annaClientContext.AnnaClient =
+            new AnnaClient(new HttpClient(), new OptionsWrapper<AnnaClientOptions>(clientOptions));
     }
 
     [AfterScenario]
@@ -88,7 +99,7 @@ public partial class ContainerHook
             {
                 Directory.CreateDirectory(logsDirectory);
             }
-            
+
             await File.WriteAllTextAsync(Path.Combine(logsDirectory, $"api-container-{timestamp}.out.txt"), stdout);
             await File.WriteAllTextAsync(Path.Combine(logsDirectory, $"api-container-{timestamp}.err.txt"), stderr);
         }

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +7,7 @@ using Anna.Index.Extensions;
 using Anna.Index.Models;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Versioning;
-using Version=Anna.Index.Models.Version;
+using Version = Anna.Index.Models.Version;
 
 namespace Anna.Index;
 
@@ -49,9 +48,11 @@ public class PackageIndex : IPackageIndex
 
     public async Task UnlistPackage(string name, NuGetVersion version)
     {
-        var packageVersion = (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))?.Versions
-                             .SingleOrDefault(v => v.PackageVersion == version) ??
-                             throw new PackageNotFoundException();
+        var packageVersion =
+            (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))
+            ?.Versions
+            .SingleOrDefault(v => v.PackageVersion == version) ??
+            throw new PackageNotFoundException();
 
         packageVersion.Unlisted = true;
 
@@ -60,9 +61,11 @@ public class PackageIndex : IPackageIndex
 
     public async Task RelistPackage(string name, NuGetVersion version)
     {
-        var packageVersion = (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))?.Versions
-                             .SingleOrDefault(v => v.PackageVersion == version) ??
-                             throw new PackageNotFoundException();
+        var packageVersion =
+            (await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.Name == name))
+            ?.Versions
+            .SingleOrDefault(v => v.PackageVersion == version) ??
+            throw new PackageNotFoundException();
 
         packageVersion.Unlisted = false;
 
@@ -87,7 +90,8 @@ public class PackageIndex : IPackageIndex
 
     public async IAsyncEnumerable<NuGetVersion> GetVersions(string lowerName)
     {
-        var package = await this._dbContext.Packages.Include(p => p.Versions).SingleOrDefaultAsync(p => p.LowerName == lowerName);
+        var package = await this._dbContext.Packages.Include(p => p.Versions)
+            .SingleOrDefaultAsync(p => p.LowerName == lowerName);
         if (package is null)
         {
             throw new PackageNotFoundException();
@@ -113,7 +117,8 @@ public class PackageIndex : IPackageIndex
     public async Task<CatalogEntry> GetCatalog(string lowerName, NuGetVersion nugetVersion)
     {
         var package = await this._dbContext.Packages.Include(p => p.Versions)
-            .SingleOrDefaultAsync(p => p.LowerName == lowerName && p.Versions.Any(v => v.PackageVersion == nugetVersion));
+            .SingleOrDefaultAsync(
+            p => p.LowerName == lowerName && p.Versions.Any(v => v.PackageVersion == nugetVersion));
         if (package is null)
         {
             throw new PackageNotFoundException();
@@ -140,15 +145,14 @@ public class PackageIndex : IPackageIndex
     {
         IQueryable<Package> dbQuery = this._dbContext.Packages
             .Include(p => p.Versions);
-        
+
         var packages = dbQuery.ToAsyncEnumerable()
             .Where(p => p.MatchesSearch(query));
         if (!prerelease)
         {
             packages = packages.Where(p => p.Versions.Any(v => !v.PackageVersion.IsPrerelease));
         }
-        
+
         return await packages.Skip(skip).Take(take).ToListAsync();
     }
-
 }

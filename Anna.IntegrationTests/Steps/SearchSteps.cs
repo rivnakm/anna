@@ -3,7 +3,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Anna.Api.Models.SearchQueryService;
+using Anna.Client.Models;
+using Anna.Common.Models.SearchQueryService;
 using Anna.IntegrationTests.Contexts;
 using Microsoft.AspNetCore.Http.Extensions;
 using Reqnroll;
@@ -14,66 +15,43 @@ namespace Anna.IntegrationTests.Steps;
 [Binding]
 public class SearchSteps
 {
-    private readonly HttpContext _httpContext;
+    private readonly AnnaClientContext _clientContext;
     private readonly SearchContext _searchContext;
 
-    public SearchSteps(HttpContext httpContext, SearchContext searchContext)
+    public SearchSteps(AnnaClientContext clientContext, SearchContext searchContext)
     {
-        this._httpContext = httpContext;
+        this._clientContext = clientContext;
         this._searchContext = searchContext;
     }
 
     [Given(@"I have a search query:\s*(.*)$")]
     public void GivenIHaveASearchQuery(string query)
     {
-        this._searchContext.QueryBuilder = new QueryBuilder();
-        this._searchContext.QueryBuilder.Add("q", query);
+        this._searchContext.SearchRequest = new SearchRequest
+        {
+            Query = query
+        };
     }
 
-    [Given("^I set the search parameter (.*) to (.*)$")]
-    private void GivenISetTheSearchParameterTo(string key, string value)
+    [Given("^I set the search to (include|exclude) prereleases$")]
+    private void GivenISetTheSearchParameterTo(string includeExclude)
     {
-        this._searchContext.QueryBuilder!.Add(key, value);
+        this._searchContext.SearchRequest!.Prerelease = includeExclude == "include";
     }
 
     [When(@"^I perform a search with query:\s*(.*)$")]
     public async Task WhenIPerformASearchWithQuery(string query)
     {
-        var queryBuilder = new QueryBuilder
-        {
-            {
-                "q", query
-            }
-        };
-        var req = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"/searchqueryservice/v3.5{queryBuilder}", UriKind.Relative)
-        };
-
-        this._httpContext.Response = await this._httpContext.HttpClient.SendAsync(req);
-
-        if (this._httpContext.Response.IsSuccessStatusCode)
-        {
-            this._searchContext.SearchResponse = await this._httpContext.Response.Content.ReadFromJsonAsync<SearchResponseDto>();
-        }
+        this._searchContext.SearchResponse =
+            await this._clientContext.AnnaClient.Search(new SearchRequest { Query = query });
     }
-    
+
     [When("I perform the search")]
     public async Task WhenIPerformTheSearch()
     {
-        var req = new HttpRequestMessage
-        {
-            Method = HttpMethod.Get,
-            RequestUri = new Uri($"/searchqueryservice/v3.5{this._searchContext.QueryBuilder}", UriKind.Relative)
-        };
-
-        this._httpContext.Response = await this._httpContext.HttpClient.SendAsync(req);
-
-        if (this._httpContext.Response.IsSuccessStatusCode)
-        {
-            this._searchContext.SearchResponse = await this._httpContext.Response.Content.ReadFromJsonAsync<SearchResponseDto>();
-        }
+        this._searchContext.SearchRequest.ShouldNotBeNull();
+        this._searchContext.SearchResponse =
+            await this._clientContext.AnnaClient.Search(this._searchContext.SearchRequest);
     }
 
     [Then(@"^the search results should contain (\d+) item(?:s)? and (\d+) total hit(?:s)?$")]
@@ -90,7 +68,7 @@ public class SearchSteps
         this._searchContext.SearchResponse.ShouldNotBeNull();
         var package = this._searchContext.SearchResponse.Results.SingleOrDefault(r => r.Id == packageName);
         package.ShouldNotBeNull();
-        
+
         package.Versions.Count.ShouldBe(versions);
     }
 }

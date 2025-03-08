@@ -1,9 +1,9 @@
-using System;
-using System.Net.Http;
 using System.Threading.Tasks;
+using Anna.Client;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using MudBlazor.Services;
 
 namespace Anna.Web;
 
@@ -15,10 +15,12 @@ public class Program
         builder.RootComponents.Add<App>("#app");
         builder.RootComponents.Add<HeadOutlet>("head::after");
 
-        builder.Services.AddScoped(sp => new HttpClient
-        {
-            BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
-        });
+        var services = builder.Services;
+
+        services.Configure<AnnaClientOptions>(builder.Configuration.GetSection(nameof(AnnaClient)));
+        services.AddHttpClient<IAnnaClient, AnnaClient>();
+
+        services.AddMudServices();
 
         await builder.Build().RunAsync();
     }

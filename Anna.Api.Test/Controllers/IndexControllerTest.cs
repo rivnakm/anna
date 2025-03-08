@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Anna.Api.Controllers;
-using Anna.Api.Models;
 using Anna.Api.Resources;
 using FakeItEasy;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +21,7 @@ public class IndexControllerTest
 
         resp.ShouldBeOfType<OkObjectResult>();
 
-        var index = ((OkObjectResult)resp).Value as IndexDto;
+        var index = ((OkObjectResult)resp).Value as Common.Models.Index;
 
         index.ShouldNotBeNull();
 
@@ -36,8 +35,10 @@ public class IndexControllerTest
         var resourceProvider = A.Fake<IResourceProvider>();
         var controller = new IndexController(resourceProvider);
 
-        A.CallTo(() => resourceProvider.GetResources()).Returns(new List<Resource> {
-            new Resource {
+        A.CallTo(() => resourceProvider.GetResources()).Returns(new List<Resource>
+        {
+            new()
+            {
                 Id = "/packagebaseaddress/v3/",
                 TypeName = "PackageBaseAddress",
                 TypeVersion = "3.0.0"
@@ -45,7 +46,7 @@ public class IndexControllerTest
         });
 
         var request = A.Fake<HttpRequest>();
-        A.CallTo(() => request.Headers).Returns(new HeaderDictionary()
+        A.CallTo(() => request.Headers).Returns(new HeaderDictionary
         {
             ["x-forwarded-proto"] = "https"
         });
@@ -61,7 +62,7 @@ public class IndexControllerTest
 
         resp.ShouldBeOfType<OkObjectResult>();
 
-        var index = ((OkObjectResult)resp).Value as IndexDto;
+        var index = ((OkObjectResult)resp).Value as Common.Models.Index;
 
         index.ShouldNotBeNull();
 

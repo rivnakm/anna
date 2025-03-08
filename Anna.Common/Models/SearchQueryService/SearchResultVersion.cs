@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Anna.Api.Models.SearchQueryService;
+namespace Anna.Common.Models.SearchQueryService;
 
-public class SearchResultVersionDto
+public class SearchResultVersion
 {
     [JsonPropertyName("@id")]
     public required string Id { get; set; }

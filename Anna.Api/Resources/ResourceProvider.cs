@@ -8,7 +8,7 @@ namespace Anna.Api.Resources;
 
 public class ResourceProvider : IResourceProvider
 {
-    private List<Resource> _resources;
+    private readonly List<Resource> _resources;
 
     public ResourceProvider()
     {
@@ -17,8 +17,7 @@ public class ResourceProvider : IResourceProvider
 
         var resources = assembly.GetTypes()
             .Where(t => t.GetCustomAttribute<ResourceAttribute>() is not null)
-            .Select(t =>
-            {
+            .Select(t => {
                 var resAttr = t.GetCustomAttribute<ResourceAttribute>()!;
 
                 return new Resource

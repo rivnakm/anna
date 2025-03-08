@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace Anna.Api.Models.RegistrationIndex;
+namespace Anna.Common.Models.RegistrationIndex;
 
-public class CatalogEntryDto
+public class CatalogEntry
 {
     [JsonPropertyName("@id")]
     public required string Id { get; init; }

@@ -1,0 +1,35 @@
+﻿@page "/"
+@using Anna.Client.Models
+@using Anna.Common.Models.SearchQueryService
+@inject IAnnaClient AnnaClient
+
+<PageTitle>Anna | Packages</PageTitle>
+
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">Id</th>
+        <th scope="col">Version</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var package in this.AllPackages)
+    {
+        <tr>
+            <td>@package.Id</td>
+            <td>@package.Version</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code
+{
+    private List<SearchResult> AllPackages { get; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await this.AnnaClient.Search(new SearchRequest());
+        this.AllPackages.AddRange(response.Results);
+    }
+}

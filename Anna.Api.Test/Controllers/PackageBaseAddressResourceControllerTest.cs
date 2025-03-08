@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Anna.Api.Controllers;
-using Anna.Api.Models;
+using Anna.Common.Models;
 using Anna.Index;
 using Anna.Index.Exceptions;
 using Anna.Storage;
@@ -20,9 +20,10 @@ public class PackageBaseAddressResourceControllerTest
     public async Task TestGetPackageVersions()
     {
         const string packageLowerName = "foo";
-        var expectedVersions = new List<NuGetVersion> {
-            new NuGetVersion(1, 0, 0),
-            new NuGetVersion(2, 0, 0)
+        var expectedVersions = new List<NuGetVersion>
+        {
+            new(1, 0, 0),
+            new(2, 0, 0)
         };
 
         var packageIndex = A.Fake<IPackageIndex>();
@@ -36,9 +37,9 @@ public class PackageBaseAddressResourceControllerTest
 
         var value = ((OkObjectResult)resp).Value;
         value.ShouldNotBeNull();
-        value.ShouldBeOfType<PackageVersionsDto>();
+        value.ShouldBeOfType<PackageVersions>();
 
-        var pkgVersionsResp = (PackageVersionsDto)value!;
+        var pkgVersionsResp = (PackageVersions)value!;
 
         pkgVersionsResp.Versions.ShouldBe(expectedVersions.Select(v => v.ToString()).ToList());
     }
@@ -62,19 +63,25 @@ public class PackageBaseAddressResourceControllerTest
         const string packageName = "Foo";
         const string packageLowerName = "foo";
         const string packageLowerVersion = "2.0.0";
-        var availableVersions = new List<NuGetVersion> {
-            new NuGetVersion(1, 0, 0),
-            new NuGetVersion(2, 0, 0)
+        var availableVersions = new List<NuGetVersion>
+        {
+            new(1, 0, 0),
+            new(2, 0, 0)
         };
 
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
         A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(availableVersions.ToAsyncEnumerable());
         A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Returns(packageName);
-        A.CallTo(() => packageStorage.GetPackage(packageName, A<NuGetVersion>.That.Matches(v => v.ToString().ToLowerInvariant() == packageLowerVersion))).Returns(new MemoryStream());
+        A.CallTo(() => packageStorage.GetPackage(packageName,
+                                                 A<NuGetVersion>.That.Matches(
+                                                 v => v.ToString().ToLowerInvariant() == packageLowerVersion)))
+            .Returns(new MemoryStream());
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
-        var resp = await controller.GetPackageFile(packageLowerName, packageLowerVersion, $"{packageLowerName}.{packageLowerVersion}");
+        var resp = await controller.GetPackageFile(packageLowerName,
+                                                   packageLowerVersion,
+                                                   $"{packageLowerName}.{packageLowerVersion}");
 
         resp.ShouldBeOfType<FileStreamResult>();
 
@@ -120,9 +127,10 @@ public class PackageBaseAddressResourceControllerTest
     public async Task TestGetPackageFile_NoVersionMatch_Returns404()
     {
         const string packageLowerName = "foo";
-        var expectedVersions = new List<NuGetVersion> {
-            new NuGetVersion(1, 0, 0),
-            new NuGetVersion(2, 0, 0)
+        var expectedVersions = new List<NuGetVersion>
+        {
+            new(1, 0, 0),
+            new(2, 0, 0)
         };
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
@@ -143,19 +151,25 @@ public class PackageBaseAddressResourceControllerTest
         const string packageName = "Foo";
         const string packageLowerName = "foo";
         const string packageLowerVersion = "2.0.0";
-        var availableVersions = new List<NuGetVersion> {
-            new NuGetVersion(1, 0, 0),
-            new NuGetVersion(2, 0, 0)
+        var availableVersions = new List<NuGetVersion>
+        {
+            new(1, 0, 0),
+            new(2, 0, 0)
         };
 
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();
         A.CallTo(() => packageIndex.GetVersions(packageLowerName)).Returns(availableVersions.ToAsyncEnumerable());
         A.CallTo(() => packageIndex.GetPackageName(packageLowerName)).Returns(packageName);
-        A.CallTo(() => packageStorage.GetPackageManifest(packageName, A<NuGetVersion>.That.Matches(v => v.ToString().ToLowerInvariant() == packageLowerVersion))).Returns(new MemoryStream());
+        A.CallTo(() => packageStorage.GetPackageManifest(packageName,
+                                                         A<NuGetVersion>.That.Matches(
+                                                         v => v.ToString().ToLowerInvariant() == packageLowerVersion)))
+            .Returns(new MemoryStream());
 
         var controller = new PackageBaseAddressResourceController(packageIndex, packageStorage);
-        var resp = await controller.GetPackageManifest(packageLowerName, packageLowerVersion, $"{packageLowerName}.{packageLowerVersion}");
+        var resp = await controller.GetPackageManifest(packageLowerName,
+                                                       packageLowerVersion,
+                                                       $"{packageLowerName}.{packageLowerVersion}");
 
         resp.ShouldBeOfType<FileStreamResult>();
 
@@ -201,9 +215,10 @@ public class PackageBaseAddressResourceControllerTest
     public async Task TestGetPackageManifest_NoVersionMatch_Returns404()
     {
         const string packageLowerName = "foo";
-        var expectedVersions = new List<NuGetVersion> {
-            new NuGetVersion(1, 0, 0),
-            new NuGetVersion(2, 0, 0)
+        var expectedVersions = new List<NuGetVersion>
+        {
+            new(1, 0, 0),
+            new(2, 0, 0)
         };
         var packageIndex = A.Fake<IPackageIndex>();
         var packageStorage = A.Fake<IPackageStorage>();

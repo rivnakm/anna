@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Anna.Api.Models;
+namespace Anna.Common.Models;
 
-public class IndexDto
+public class Index
 {
     public required string Version { get; init; }
     public required List<Resource> Resources { get; init; }

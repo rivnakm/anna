@@ -15,8 +15,9 @@ public class PackageStorageTest
     {
         const string storageRootDir = "/app/anna/packages";
         const string fileContents = "foobar";
-        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData> {
-            {$"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nupkg", new MockFileData(fileContents)}
+        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { $"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nupkg", new MockFileData(fileContents) }
         });
 
         var packageStorage = new PackageStorage(storageRootDir, filesystem);
@@ -32,8 +33,9 @@ public class PackageStorageTest
     {
         const string storageRootDir = "/app/anna/packages";
         const string fileContents = "foobar";
-        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData> {
-            {$"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nuspec", new MockFileData(fileContents)}
+        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { $"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nuspec", new MockFileData(fileContents) }
         });
 
         var packageStorage = new PackageStorage(storageRootDir, filesystem);
@@ -89,11 +91,12 @@ public class PackageStorageTest
     {
         const string storageRootDir = "/app/anna/packages";
         const string fileContents = "foobar";
-        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData> {
-            {$"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nupkg", new MockFileData(fileContents)},
-            {$"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nuspec", new MockFileData(fileContents)},
-            {$"{storageRootDir}/f/Foo/2.0.0/Foo.2.0.0.nupkg", new MockFileData(fileContents)},
-            {$"{storageRootDir}/f/Foo/2.0.0/Foo.2.0.0.nuspec", new MockFileData(fileContents)}
+        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { $"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nupkg", new MockFileData(fileContents) },
+            { $"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nuspec", new MockFileData(fileContents) },
+            { $"{storageRootDir}/f/Foo/2.0.0/Foo.2.0.0.nupkg", new MockFileData(fileContents) },
+            { $"{storageRootDir}/f/Foo/2.0.0/Foo.2.0.0.nuspec", new MockFileData(fileContents) }
         });
 
         var packageStorage = new PackageStorage(storageRootDir, filesystem);
@@ -112,9 +115,10 @@ public class PackageStorageTest
     {
         const string storageRootDir = "/app/anna/packages";
         const string fileContents = "foobar";
-        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData> {
-            {$"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nupkg", new MockFileData(fileContents)},
-            {$"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nuspec", new MockFileData(fileContents)},
+        var filesystem = new MockFileSystem(new Dictionary<string, MockFileData>
+        {
+            { $"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nupkg", new MockFileData(fileContents) },
+            { $"{storageRootDir}/f/Foo/1.0.0/Foo.1.0.0.nuspec", new MockFileData(fileContents) }
         });
 
         var packageStorage = new PackageStorage(storageRootDir, filesystem);

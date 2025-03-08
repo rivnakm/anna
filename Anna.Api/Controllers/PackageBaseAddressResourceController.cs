@@ -1,7 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Anna.Api.Attributes;
-using Anna.Api.Models;
+using Anna.Common.Models;
 using Anna.Index;
 using Anna.Index.Exceptions;
 using Anna.Storage;
@@ -26,7 +26,7 @@ public class PackageBaseAddressResourceController : ResourceController
 
     [Route("{lowerId}/index.json")]
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageVersionsDto))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PackageVersions))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetPackageVersions(string lowerId)
     {
@@ -34,7 +34,7 @@ public class PackageBaseAddressResourceController : ResourceController
         {
             var versions = await this._packageIndex.GetVersions(lowerId).Select(v => v.ToString()).ToListAsync();
 
-            var response = new PackageVersionsDto
+            var response = new PackageVersions
             {
                 Versions = versions
             };
@@ -62,15 +62,17 @@ public class PackageBaseAddressResourceController : ResourceController
         {
             var name = await this._packageIndex.GetPackageName(lowerId);
             var version = await this._packageIndex.GetVersions(lowerId)
-                    .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
+                .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
             if (version is null)
             {
                 return new NotFoundResult();
             }
 
-            var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackage(name, version), MimeTypes.Application.OctetStream);
-
-            fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nupkg";
+            var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackage(name, version),
+                                                        MimeTypes.Application.OctetStream)
+            {
+                FileDownloadName = $"{lowerId}.{lowerVersion}.nupkg"
+            };
 
             return fileStreamResult;
         }
@@ -95,13 +97,14 @@ public class PackageBaseAddressResourceController : ResourceController
         {
             var name = await this._packageIndex.GetPackageName(lowerId);
             var version = await this._packageIndex.GetVersions(lowerId)
-                    .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
+                .SingleOrDefaultAsync(v => v.ToString().ToLowerInvariant() == lowerVersion);
             if (version is null)
             {
                 return new NotFoundResult();
             }
 
-            var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackageManifest(name, version), MimeTypes.Application.Xml);
+            var fileStreamResult = new FileStreamResult(this._packageStorage.GetPackageManifest(name, version),
+                                                        MimeTypes.Application.Xml);
 
             fileStreamResult.FileDownloadName = $"{lowerId}.{lowerVersion}.nuspec";
 

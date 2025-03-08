@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 
-namespace Anna.Api.Models;
+namespace Anna.Common.Models;
 
-public class PackageVersionsDto
+public class PackageVersions
 {
     public required List<string> Versions { get; init; }
 }

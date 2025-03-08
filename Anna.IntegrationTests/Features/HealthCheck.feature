@@ -1,5 +1,5 @@
 Feature: Health Check
 
-  Scenario: Check Service Health
-    When I make a GET request to /healthcheck
-    Then the response status code should be 200
+    Scenario: Check Service Health
+        When I check the service health
+        Then the service should be healthy

@@ -17,15 +17,17 @@ namespace Anna.Index.Test;
 
 public class PackageIndexTest : IAsyncLifetime
 {
-    private PostgreSqlContainer _pgContainer = null!;
     private IndexContext _dbContext = null!;
     private PackageIndex _packageIndex = null!;
+    private PostgreSqlContainer _pgContainer = null!;
 
     public async Task InitializeAsync()
     {
         this._pgContainer = new PostgreSqlBuilder()
             .WithImage(TestConstants.PostgreSqlImage)
-            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(new PostgreSqlWaitStrategy(), o => o.WithTimeout(TimeSpan.FromMinutes(1)))).Build();
+            .WithWaitStrategy(Wait.ForUnixContainer().AddCustomWaitStrategy(
+                              new PostgreSqlWaitStrategy(),
+                              waitStrategyModifier: o => o.WithTimeout(TimeSpan.FromMinutes(1)))).Build();
         await this._pgContainer.StartAsync();
         var dbContextOptionsBuilder = new DbContextOptionsBuilder<IndexContext>();
         dbContextOptionsBuilder.UseNpgsql(this._pgContainer.GetConnectionString());
@@ -45,7 +47,8 @@ public class PackageIndexTest : IAsyncLifetime
     [Fact]
     public async Task TestGetVersions_NoMatch_ReturnsEmpty()
     {
-        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.GetVersions("package").ToListAsync());
+        await Should.ThrowAsync<PackageNotFoundException>(
+        async () => await this._packageIndex.GetVersions("package").ToListAsync());
     }
 
     [Fact]
@@ -56,14 +59,16 @@ public class PackageIndexTest : IAsyncLifetime
             Name = "Package",
             LowerName = "package",
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = new NuGetVersion(1, 0, 0),
-            },
-            new Version {
-                PackageVersion = new NuGetVersion(2, 0, 0),
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                },
+                new()
+                {
+                    PackageVersion = new NuGetVersion(2, 0, 0)
+                }
             }
-        }
         };
 
         await this._dbContext.AddAsync(package);
@@ -76,7 +81,8 @@ public class PackageIndexTest : IAsyncLifetime
     [Fact]
     public async Task TestGetPackageName_NoMatch_Throws()
     {
-        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.GetPackageName("package"));
+        await Should.ThrowAsync<PackageNotFoundException>(
+        async () => await this._packageIndex.GetPackageName("package"));
     }
 
     [Fact]
@@ -87,14 +93,16 @@ public class PackageIndexTest : IAsyncLifetime
             Name = "Package",
             LowerName = "package",
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = new NuGetVersion(1, 0, 0),
-            },
-            new Version {
-                PackageVersion = new NuGetVersion(2, 0, 0),
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                },
+                new()
+                {
+                    PackageVersion = new NuGetVersion(2, 0, 0)
+                }
             }
-        }
         };
 
         await this._dbContext.AddAsync(package);
@@ -112,7 +120,8 @@ public class PackageIndexTest : IAsyncLifetime
 
         await this._packageIndex.AddPackage(packageName, packageVersion);
 
-        this._dbContext.Packages.ShouldContain(p => p.Name == packageName && p.LowerName == packageName.ToLowerInvariant());
+        this._dbContext.Packages.ShouldContain(p => p.Name == packageName &&
+                                                    p.LowerName == packageName.ToLowerInvariant());
 
         var package = await this._dbContext.Packages.Include(p => p.Versions).SingleAsync(p => p.Name == packageName);
         package.Versions.ShouldContain(v => v.PackageVersion == packageVersion);
@@ -126,14 +135,16 @@ public class PackageIndexTest : IAsyncLifetime
             Name = "Package",
             LowerName = "package",
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = new NuGetVersion(1, 0, 0),
-            },
-            new Version {
-                PackageVersion = new NuGetVersion(2, 0, 0),
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                },
+                new()
+                {
+                    PackageVersion = new NuGetVersion(2, 0, 0)
+                }
             }
-        }
         };
 
         await this._dbContext.AddAsync(package);
@@ -145,7 +156,8 @@ public class PackageIndexTest : IAsyncLifetime
 
         this._dbContext.Packages.ShouldContain(p => p.Name == package.Name && p.LowerName == package.LowerName);
 
-        var outPackage = await this._dbContext.Packages.Include(p => p.Versions).SingleAsync(p => p.Name == package.Name);
+        var outPackage = await this._dbContext.Packages.Include(p => p.Versions)
+            .SingleAsync(p => p.Name == package.Name);
         package.Versions.ShouldContain(v => v.PackageVersion == newVersion);
     }
 
@@ -157,14 +169,16 @@ public class PackageIndexTest : IAsyncLifetime
             Name = "Package",
             LowerName = "package",
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = new NuGetVersion(1, 0, 0),
-            },
-            new Version {
-                PackageVersion = new NuGetVersion(2, 0, 0),
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                },
+                new()
+                {
+                    PackageVersion = new NuGetVersion(2, 0, 0)
+                }
             }
-        }
         };
 
         await this._dbContext.AddAsync(package);
@@ -187,11 +201,12 @@ public class PackageIndexTest : IAsyncLifetime
             Name = packageName,
             LowerName = packageName.ToLowerInvariant(),
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = packageVersion,
-            },
-        }
+            {
+                new()
+                {
+                    PackageVersion = packageVersion
+                }
+            }
         };
 
         await this._dbContext.AddAsync(package);
@@ -199,7 +214,8 @@ public class PackageIndexTest : IAsyncLifetime
 
         await this._packageIndex.UnlistPackage(packageName, packageVersion);
 
-        var pkgVerObject = this._dbContext.Packages.Include(p => p.Versions).Single(p => p.Name == packageName).Versions.Single(v => v.PackageVersion == packageVersion);
+        var pkgVerObject = this._dbContext.Packages.Include(p => p.Versions).Single(p => p.Name == packageName).Versions
+            .Single(v => v.PackageVersion == packageVersion);
 
         pkgVerObject.Unlisted.ShouldBeTrue();
     }
@@ -221,11 +237,12 @@ public class PackageIndexTest : IAsyncLifetime
             Name = packageName,
             LowerName = packageName.ToLowerInvariant(),
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = new NuGetVersion(1, 0, 0)
-            },
-        }
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                }
+            }
         };
 
         await this._dbContext.AddAsync(package);
@@ -246,12 +263,13 @@ public class PackageIndexTest : IAsyncLifetime
             Name = packageName,
             LowerName = packageName.ToLowerInvariant(),
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = packageVersion,
-                Unlisted = true,
-            },
-        }
+            {
+                new()
+                {
+                    PackageVersion = packageVersion,
+                    Unlisted = true
+                }
+            }
         };
 
         await this._dbContext.AddAsync(package);
@@ -259,7 +277,8 @@ public class PackageIndexTest : IAsyncLifetime
 
         await this._packageIndex.RelistPackage(packageName, packageVersion);
 
-        var pkgVerObject = this._dbContext.Packages.Include(p => p.Versions).Single(p => p.Name == packageName).Versions.Single(v => v.PackageVersion == packageVersion);
+        var pkgVerObject = this._dbContext.Packages.Include(p => p.Versions).Single(p => p.Name == packageName).Versions
+            .Single(v => v.PackageVersion == packageVersion);
 
         pkgVerObject.Unlisted.ShouldBeFalse();
     }
@@ -281,11 +300,12 @@ public class PackageIndexTest : IAsyncLifetime
             Name = packageName,
             LowerName = packageName.ToLowerInvariant(),
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = new NuGetVersion(1, 0, 0)
-            },
-        }
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                }
+            }
         };
 
         await this._dbContext.AddAsync(package);
@@ -306,11 +326,12 @@ public class PackageIndexTest : IAsyncLifetime
             Name = packageName,
             LowerName = packageName.ToLowerInvariant(),
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = packageVersion,
-            },
-        }
+            {
+                new()
+                {
+                    PackageVersion = packageVersion
+                }
+            }
         };
 
         await this._dbContext.AddAsync(package);
@@ -332,14 +353,16 @@ public class PackageIndexTest : IAsyncLifetime
             Name = packageName,
             LowerName = packageName.ToLowerInvariant(),
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = packageVersion,
-            },
-            new Version {
-                PackageVersion = existingVersion,
+            {
+                new()
+                {
+                    PackageVersion = packageVersion
+                },
+                new()
+                {
+                    PackageVersion = existingVersion
+                }
             }
-        }
         };
 
         await this._dbContext.AddAsync(package);
@@ -357,7 +380,8 @@ public class PackageIndexTest : IAsyncLifetime
     [Fact]
     public async Task TestRemovePackage_NoNameMatch_Throws()
     {
-        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.RemovePackage("package", new NuGetVersion(1, 0, 0)));
+        await Should.ThrowAsync<PackageNotFoundException>(
+        async () => await this._packageIndex.RemovePackage("package", new NuGetVersion(1, 0, 0)));
     }
 
     [Fact]
@@ -369,16 +393,18 @@ public class PackageIndexTest : IAsyncLifetime
             Name = packageName,
             LowerName = packageName.ToLowerInvariant(),
             Versions = new List<Version>
-        {
-            new Version {
-                PackageVersion = new NuGetVersion(1, 0, 0)
-            },
-        }
+            {
+                new()
+                {
+                    PackageVersion = new NuGetVersion(1, 0, 0)
+                }
+            }
         };
 
         await this._dbContext.AddAsync(package);
         await this._dbContext.SaveChangesAsync();
 
-        await Should.ThrowAsync<PackageNotFoundException>(async () => await this._packageIndex.RemovePackage(packageName, new NuGetVersion(2, 0, 0)));
+        await Should.ThrowAsync<PackageNotFoundException>(
+        async () => await this._packageIndex.RemovePackage(packageName, new NuGetVersion(2, 0, 0)));
     }
 }

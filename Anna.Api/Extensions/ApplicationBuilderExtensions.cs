@@ -12,7 +12,7 @@ public static class ApplicationBuilderExtensions
         using var scope = app.ApplicationServices.CreateScope();
         using var db = scope.ServiceProvider.GetRequiredService<IndexContext>();
         db.Database.Migrate();
-        
+
         return app;
     }
 }

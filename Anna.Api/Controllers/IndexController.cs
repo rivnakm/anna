@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Threading.Tasks;
-using Anna.Api.Models;
 using Anna.Api.Resources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,24 +19,24 @@ public class IndexController : ControllerBase
 
     [HttpGet]
     [HttpHead]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IndexDto))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Common.Models.Index))]
     public Task<IActionResult> GetIndex()
     {
-        return Task.FromResult<IActionResult>(new OkObjectResult(new IndexDto
+        return Task.FromResult<IActionResult>(new OkObjectResult(new Common.Models.Index
         {
             Version = "3.0.0",
             Resources = this._resourceProvider.GetResources()
-                .Select(res =>
-                {
+                .Select(res => {
                     var scheme = HttpContext.Request.Scheme;
                     if (HttpContext.Request.Headers.TryGetValue("x-forwarded-proto", out var schemeValues))
                     {
                         scheme = schemeValues.First();
                     }
-                    return new IndexDto.Resource
+
+                    return new Common.Models.Index.Resource
                     {
                         Id = $"{scheme}://{HttpContext.Request.Host}{res.Id}",
-                        Type = $"{res.TypeName}/{res.TypeVersion}",
+                        Type = $"{res.TypeName}/{res.TypeVersion}"
                     };
                 }).ToList()
         }));

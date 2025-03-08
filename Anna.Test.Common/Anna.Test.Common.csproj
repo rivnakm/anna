@@ -6,9 +6,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Npgsql" />
-      <PackageReference Include="TestContainers" />
-      <PackageReference Include="TestContainers.PostgreSQL" />
+        <PackageReference Include="Npgsql"/>
+        <PackageReference Include="TestContainers"/>
+        <PackageReference Include="TestContainers.PostgreSQL"/>
     </ItemGroup>
 
 </Project>

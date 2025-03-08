@@ -13,7 +13,8 @@ public class PostgreSqlWaitStrategy : IWaitUntil
     {
         if (container is not PostgreSqlContainer pgContainer)
         {
-            throw new InvalidOperationException($"{nameof(PostgreSqlWaitStrategy)} is only supported for PostgreSQL containers");
+            throw new InvalidOperationException(
+            $"{nameof(PostgreSqlWaitStrategy)} is only supported for PostgreSQL containers");
         }
 
         try
@@ -28,6 +29,7 @@ public class PostgreSqlWaitStrategy : IWaitUntil
             {
                 return false;
             }
+
             throw;
         }
         catch (Exception)

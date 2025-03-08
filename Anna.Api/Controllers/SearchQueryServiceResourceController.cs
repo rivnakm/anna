@@ -1,8 +1,7 @@
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Anna.Api.Attributes;
-using Anna.Api.Models.SearchQueryService;
+using Anna.Common.Models.SearchQueryService;
 using Anna.Index;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,18 +22,23 @@ public class SearchQueryServiceResourceController : ResourceController
 
     [HttpGet]
     [HttpHead]
-    public async Task<IActionResult> Search([FromQuery] string q = "", [FromQuery] int skip = 0, [FromQuery] int take = 100, [FromQuery] bool prerelease = false, [FromQuery] string? semVerLevel = null, [FromQuery] string? packageType = null)
+    public async Task<IActionResult> Search([FromQuery] string q = "", [FromQuery] int skip = 0,
+        [FromQuery]
+        int take = 100, [FromQuery] bool prerelease = false, [FromQuery] string? semVerLevel = null,
+        [FromQuery]
+        string? packageType = null)
     {
         if (semVerLevel != null || packageType != null)
         {
             return new StatusCodeResult(StatusCodes.Status501NotImplemented);
         }
 
-        var results = (await this._packageIndex.QueryPackages(q, skip, take, prerelease)).Select(p => new SearchResultDto
+        var results = (await this._packageIndex.QueryPackages(q, skip, take, prerelease)).Select(p => new SearchResult
         {
             Id = p.Name,
             Version = p.Versions.First().PackageVersion.ToString(),
-            Versions = p.Versions.Where(v => !v.PackageVersion.IsPrerelease || prerelease).Select(v => new SearchResultVersionDto
+            Versions = p.Versions.Where(v => !v.PackageVersion.IsPrerelease || prerelease).Select(
+            v => new SearchResultVersion
             {
                 Id = p.Name,
                 Version = v.PackageVersion.ToString(),
@@ -42,7 +46,7 @@ public class SearchQueryServiceResourceController : ResourceController
             }).ToList(),
             PackageTypes = []
         }).ToList();
-        var resp = new SearchResponseDto
+        var resp = new SearchResponse
         {
             TotalHits = await this._packageIndex.CountPackages(q, prerelease),
             Results = results
