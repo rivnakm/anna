@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text.Json;
 using Anna.Api.Extensions;
 using Anna.Api.Resources;
@@ -32,6 +33,17 @@ public class Program
         });
 
         var services = builder.Services;
+
+        services.AddCors(options => {
+            options.AddDefaultPolicy(
+            policy => {
+                var allowedOrigins = config.GetSection("Cors").GetSection("AllowedOrigins").Get<string[]>();
+                if (allowedOrigins is not null && allowedOrigins.Length > 0)
+                {
+                    policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                }
+            });
+        });
 
         services.AddControllers().AddJsonOptions(options => {
             options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -73,6 +85,8 @@ public class Program
 
         app.UseMigrations();
         app.UseRouting();
+
+        app.UseCors();
 
         app.UseHttpsRedirection();
         app.UseAuthorization();
