@@ -5,9 +5,10 @@
 
 <PageTitle>Anna | Packages</PageTitle>
 
-<MudTextField @bind-Value:get="@this._searchText" @bind-Value:set="@(str => this.UpdateSearch(str))"
+<MudTextField @bind-Value:get="@this._searchText" @bind-Value:set="@(str => this.UpdateSearchText(str))"
               DebounceInterval="250" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
               Variant="Variant.Outlined" Clearable="true"/>
+<MudCheckBox @bind-Value:get="@this._includePrereleases" @bind-Value:set="@(pre => this.UpdateSearchPrerelease(pre))" Label="Include prereleases"/>
 <MudTable Items="@this.AllPackages" Loading="@this._loading">
     <HeaderContent>
         <MudTh>Id</MudTh>
@@ -24,20 +25,33 @@
     private List<SearchResult> AllPackages { get; } = [];
     private bool _loading = true;
     private string _searchText = string.Empty;
+    private bool _includePrereleases = false;
 
     protected override async Task OnInitializedAsync()
     {
         var response = await this.AnnaClient.Search(new SearchRequest
         {
-            Query = this._searchText
+            Query = this._searchText,
+            Prerelease = this._includePrereleases
         });
         this.AllPackages.AddRange(response.Results);
         this._loading = false;
     }
 
-    private async Task UpdateSearch(string search)
+    private async Task UpdateSearchText(string search)
     {
         this._searchText = search;
+        await this.UpdateSearch();
+    }
+
+    private async Task UpdateSearchPrerelease(bool prerelease)
+    {
+        this._includePrereleases = prerelease;
+        await this.UpdateSearch();
+    }
+
+    private async Task UpdateSearch()
+    {
         this._loading = true;
         this.AllPackages.Clear();
 
